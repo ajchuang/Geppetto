@@ -26,6 +26,7 @@ public class MainActivity extends ActionBarActivity
     Sensor mAccMeter;
     Sensor mMagMeter;
     Sensor mGyroMeter;
+    Sensor mRotMeter;
 
     /* init TCP connection */
     Socket m_socket;
@@ -46,6 +47,7 @@ public class MainActivity extends ActionBarActivity
     final static String M_LOGTAG = "JH3478";
     final static int M_GYRO = 1;
     final static int M_CMD  = 2;
+    final static int M_N_SAMPLES = 10;
 
     /* NW functions */
     boolean init_connection () {
@@ -81,14 +83,15 @@ public class MainActivity extends ActionBarActivity
 
         try {
 
+            /* smooth the data set by using sliding window average */
             DataSample ds = new DataSample (ts, x, y, z);
 
             if (m_queue.size() == 10) {
 
-                Iterator it = m_queue.iterator();
+                Iterator it = m_queue.iterator ();
 
-                while (it.hasNext()) {
-                    DataSample t = (DataSample)it.next ();
+                while (it.hasNext ()) {
+                    DataSample t = (DataSample) it.next ();
                     x_sum += t.m_x;
                     y_sum += t.m_y;
                     z_sum += t.m_z;
@@ -101,7 +104,12 @@ public class MainActivity extends ActionBarActivity
                 return;
             }
 
-            String out = "GO " + ts + " " + x_sum/10 + " " + y_sum/10 + " " + z_sum/10 + " ";
+            String out =
+                    "GO " + ts + " " +
+                    x_sum/M_N_SAMPLES + " " +
+                    y_sum/M_N_SAMPLES + " " +
+                    z_sum/M_N_SAMPLES + " ";
+
             m_outputStream.write (out.toCharArray(), 0, out.length());
             m_outputStream.flush ();
         } catch (Exception e) {
@@ -114,11 +122,13 @@ public class MainActivity extends ActionBarActivity
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAccMeter = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mGyroMeter = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mRotMeter = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
     }
 
     void registerCallback() {
         mSensorManager.registerListener(this, mAccMeter, SensorManager.SENSOR_DELAY_UI);
         mSensorManager.registerListener(this, mGyroMeter, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(this, mRotMeter, SensorManager.SENSOR_DELAY_UI);
     }
 
     void dismissCallback() {
@@ -182,7 +192,9 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-        if (event.sensor == mGyroMeter) {
+        if (event.sensor == mRotMeter) {
+            processRot (event);
+        } else if (event.sensor == mGyroMeter) {
             processGyro (event);
         } else if (event.sensor == mAccMeter) {
             processAcc (event);
@@ -205,8 +217,7 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    void processGyro (SensorEvent event) {
-
+    void processRot (SensorEvent event) {
         float axisX = event.values[0];
         float axisY = event.values[1];
         float axisZ = event.values[2];
@@ -214,6 +225,18 @@ public class MainActivity extends ActionBarActivity
         String out = "GO " + event.timestamp + " " + axisX + " " + axisY + " " + axisZ + " ";
         m_dbgView.setText (out);
         send_data (event.timestamp, axisX, axisY, axisZ);
+    }
+
+    void processGyro (SensorEvent event) {
+/*
+        float axisX = event.values[0];
+        float axisY = event.values[1];
+        float axisZ = event.values[2];
+
+        String out = "GO " + event.timestamp + " " + axisX + " " + axisY + " " + axisZ + " ";
+        m_dbgView.setText (out);
+        send_data (event.timestamp, axisX, axisY, axisZ);
+*/
     }
 
     void processAcc (SensorEvent event) {
