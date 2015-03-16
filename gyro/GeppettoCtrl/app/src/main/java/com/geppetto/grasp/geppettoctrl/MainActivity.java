@@ -52,8 +52,11 @@ public class MainActivity extends ActionBarActivity
 
         try {
             Log.v (M_LOGTAG, "Connect to " + m_serverIp + ":" + m_serverPort);
+            //String hello = new String ("GYRO ");
             m_socket = new Socket (m_serverIp, Integer.parseInt (m_serverPort));
             m_outputStream = new OutputStreamWriter (m_socket.getOutputStream ());
+            //m_outputStream.write (hello.toCharArray(), 0, hello.length());
+            //m_outputStream.flush ();
         } catch (Exception e) {
             Log.v (M_LOGTAG, "failed to connect to the server");
             return false;
@@ -100,6 +103,7 @@ public class MainActivity extends ActionBarActivity
 
             String out = "GO " + ts + " " + x_sum/10 + " " + y_sum/10 + " " + z_sum/10 + " ";
             m_outputStream.write (out.toCharArray(), 0, out.length());
+            m_outputStream.flush ();
         } catch (Exception e) {
             Log.v (M_LOGTAG, "failed to send data");
         }

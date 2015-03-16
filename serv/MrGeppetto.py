@@ -12,7 +12,9 @@ N_REC_SIZE = 6
 
 # global variabls
 g_tok_q = deque ()
-g_host, g_port = socket.gethostbyname (socket.gethostname ()), 4001
+g_host  = socket.gethostbyname (socket.gethostname ())
+g_gyro_port     = 4001
+g_kinect_port   = 4002
 
 # using ros function
 def send_ros (pub, cmd, ts, x, y, z):
@@ -45,10 +47,10 @@ def parse_input (data, pub):
         # send via ROS functions
         send_ros (pub, cmd, ts, x, y, z)
 
-def handler (conn, addr):
+def handler (type, conn, addr):
     
     try:
-        pub = rospy.Publisher ('wrist', String, queue_size=10)
+        pub = rospy.Publisher (type, String, queue_size=10)
         rospy.init_node ('talker', anonymous=True)
         rate = rospy.Rate (10) # 10hz
         
@@ -62,13 +64,13 @@ def handler (conn, addr):
         print 'ros interrupt exception'
         pass
             
-def server_thread ():
+def gyro_server_thread ():
     
     server = None
 
     try:
         server = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
-        server.bind ((g_host, g_port))
+        server.bind ((g_host, g_gyro_port))
     except:
         print 'failed to start Mr.Geppetto'
         sys.exit ()
@@ -79,7 +81,30 @@ def server_thread ():
         try:
             conn, addr = server.accept ()
             print 'Connected with ' + addr[0] + ':' + str(addr[1])
-            thread.start_new_thread (handler, (conn, addr))
+            thread.start_new_thread (handler, ('gyro', conn, addr))
+        except:
+            print 'Mr.Geppetto(server) is not working'
+            server.close ()
+            return
+
+def kinect_server_thread ():
+    
+    server = None
+
+    try:
+        server = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+        server.bind ((g_host, g_kinect_port))
+    except:
+        print 'failed to start Mr.Geppetto'
+        sys.exit ()
+    
+    server.listen (10)
+    
+    while True:
+        try:
+            conn, addr = server.accept ()
+            print 'Connected with ' + addr[0] + ':' + str(addr[1])
+            thread.start_new_thread (handler, ('kinect', conn, addr))
         except:
             print 'Mr.Geppetto(server) is not working'
             server.close ()
@@ -90,16 +115,19 @@ if __name__ == "__main__":
     
     argc = len (sys.argv) 
     
-    if argc == 2:
-        g_port = int (sys.argv[1])
+    if argc == 3:
+        g_gyro_port     = int (sys.argv[1])
+        g_kinect_port   = int (sys.argv[2])
     elif argc == 1:
+        # use default
         pass
     else:
         print 'incorrect params'
         sys.exit ()
     
-    print 'Mr.Geppetto is starting @ {}:{}'.format(g_host, g_port)
-    thread.start_new_thread (server_thread, ())
+    print 'Mr.Geppetto is starting @ {}:{},{}'.format(g_host, g_gyro_port, g_kinect_port)
+    thread.start_new_thread (gyro_server_thread, ())
+    thread.start_new_thread (kinect_server_thread, ())
     
     # admin command processing
     while True:
