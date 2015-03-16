@@ -17,7 +17,7 @@ g_host, g_port = socket.gethostbyname (socket.gethostname ()), 4001
 # using ros function
 def send_ros (pub, cmd, ts, x, y, z):
     print "ros send: {}:{}:{}:{}:{}".format (cmd, ts, x, y, z)
-    sent = ts + ':' + x + ':' + y + ':' + z
+    sent = cmd + ':' + ts + ':' + x + ':' + y + ':' + z
     pub.publish (sent);
 
 def parse_input (data, pub):
