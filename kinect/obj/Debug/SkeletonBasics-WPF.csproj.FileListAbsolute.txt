@@ -1,0 +1,12 @@
+C:\Users\BY\Desktop\Project\Geppetto\kinect\bin\Debug\SkeletonBasics-WPF.exe
+C:\Users\BY\Desktop\Project\Geppetto\kinect\bin\Debug\SkeletonBasics-WPF.pdb
+C:\Users\BY\Desktop\Project\Geppetto\kinect\obj\Debug\SkeletonBasics-WPF.csprojResolveAssemblyReference.cache
+C:\Users\BY\Desktop\Project\Geppetto\kinect\obj\Debug\MainWindow.baml
+C:\Users\BY\Desktop\Project\Geppetto\kinect\obj\Debug\MainWindow.g.cs
+C:\Users\BY\Desktop\Project\Geppetto\kinect\obj\Debug\App.g.cs
+C:\Users\BY\Desktop\Project\Geppetto\kinect\obj\Debug\SkeletonBasics-WPF_MarkupCompile.cache
+C:\Users\BY\Desktop\Project\Geppetto\kinect\obj\Debug\SkeletonBasics-WPF.g.resources
+C:\Users\BY\Desktop\Project\Geppetto\kinect\obj\Debug\Microsoft.Samples.Kinect.SkeletonBasics.Properties.Resources.resources
+C:\Users\BY\Desktop\Project\Geppetto\kinect\obj\Debug\SkeletonBasics-WPF.csproj.GenerateResource.Cache
+C:\Users\BY\Desktop\Project\Geppetto\kinect\obj\Debug\SkeletonBasics-WPF.exe
+C:\Users\BY\Desktop\Project\Geppetto\kinect\obj\Debug\SkeletonBasics-WPF.pdb
