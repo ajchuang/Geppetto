@@ -6,6 +6,7 @@ from collections import deque
 
 # ros imports
 import rospy
+from std_msgs.msg import String
 
 # constants
 N_REC_SIZE = 6
