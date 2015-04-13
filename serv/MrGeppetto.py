@@ -17,6 +17,9 @@ g_host  = socket.gethostbyname (socket.gethostname ())
 g_gyro_port     = 4001
 g_kinect_port   = 4002
 
+g_pub_kinect    = None
+g_pub_gyro      = None
+
 # using ros function
 def send_ros (pub, cmd, ts, x, y, z):
     print "ros send: {}:{}:{}:{}:{}".format (cmd, ts, x, y, z)
@@ -48,12 +51,10 @@ def parse_input (data, pub):
         # send via ROS functions
         send_ros (pub, cmd, ts, x, y, z)
 
-def handler (type, conn, addr):
+def handler (pub, conn, addr):
     
     try:
-        pub = rospy.Publisher (type, String, queue_size=10)
-        rospy.init_node ('talker', anonymous=True)
-        rate = rospy.Rate (10) # 10hz
+        
         
         # Keep the client here
         while True:
@@ -82,7 +83,7 @@ def gyro_server_thread ():
         try:
             conn, addr = server.accept ()
             print 'Connected with ' + addr[0] + ':' + str(addr[1])
-            thread.start_new_thread (handler, ('gyro', conn, addr))
+            thread.start_new_thread (handler, (g_pub_gyro, conn, addr))
         except:
             print 'Mr.Geppetto(server) is not working'
             server.close ()
@@ -105,7 +106,7 @@ def kinect_server_thread ():
         try:
             conn, addr = server.accept ()
             print 'Connected with ' + addr[0] + ':' + str(addr[1])
-            thread.start_new_thread (handler, ('kinect', conn, addr))
+            thread.start_new_thread (handler, (g_pub_kinect, conn, addr))
         except:
             print 'Mr.Geppetto(server) is not working'
             server.close ()
@@ -125,17 +126,19 @@ if __name__ == "__main__":
     else:
         print 'incorrect params'
         sys.exit ()
+        
+    print 'Initialize ROS nodes - kinect'
+    g_pub_kinect = rospy.Publisher ('kinect', String, queue_size=10)
+    rospy.init_node ('kinect', anonymous=True)
+    rate = rospy.Rate (10) # 10hz
     
-    print 'Mr.Geppetto is starting @ {}:{},{}'.format(g_host, g_gyro_port, g_kinect_port)
+    print 'Initialize ROS nodes - gyro'
+    g_pub_gyro   = rospy.Publisher ('gyro',   String, queue_size=10)
+    rospy.init_node ('gyro', anonymous=True)
+    rate = rospy.Rate (10) # 10hz
+    
+    print 'Starting Mr.Geppetto server @ {}:{},{}'.format(g_host, g_gyro_port, g_kinect_port)
     thread.start_new_thread (gyro_server_thread, ())
     thread.start_new_thread (kinect_server_thread, ())
     
-    # admin command processing
-    while True:
-        line = sys.stdin.readline ().strip ()
-        print 'admin cmd: {}'.format (line)
-        
-        if line == 'quit':
-            print 'Mr. Geppetto is done. (admin request)'
-            sys.exit ()
     
