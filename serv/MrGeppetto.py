@@ -17,6 +17,7 @@ g_host  = socket.gethostbyname (socket.gethostname ())
 g_gyro_port     = 4001
 g_kinect_port   = 4002
 
+# global variables for ROS publisher
 g_pub_kinect    = None
 g_pub_gyro      = None
 
@@ -54,14 +55,14 @@ def parse_input (data, pub):
 def handler (pub, conn, addr):
     
     try:
-        
+        print 'handler started'
         
         # Keep the client here
         while True:
-            print 'handler started'
             # get the new (raw) data
             new_data = conn.recv (256)
             parse_input (new_data, pub)
+            
     except rospy.ROSInterruptException:
         print 'ros interrupt exception'
         pass
@@ -73,19 +74,20 @@ def gyro_server_thread ():
     try:
         server = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
         server.bind ((g_host, g_gyro_port))
+        server.listen (10)
     except:
         print 'failed to start Mr.Geppetto'
         sys.exit ()
     
-    server.listen (10)
-    
+    # starting the server loop
     while True:
         try:
             conn, addr = server.accept ()
             print 'Connected with ' + addr[0] + ':' + str(addr[1])
+            
             thread.start_new_thread (handler, (g_pub_gyro, conn, addr))
         except:
-            print 'Mr.Geppetto(server) is not working'
+            print 'Mr.Geppetto(gyro) is not working'
             server.close ()
             return
 
@@ -96,19 +98,20 @@ def kinect_server_thread ():
     try:
         server = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
         server.bind ((g_host, g_kinect_port))
+        server.listen (10)
     except:
         print 'failed to start Mr.Geppetto'
         sys.exit ()
     
-    server.listen (10)
-    
+    # starting the server loop
     while True:
         try:
             conn, addr = server.accept ()
             print 'Connected with ' + addr[0] + ':' + str(addr[1])
+            
             thread.start_new_thread (handler, (g_pub_kinect, conn, addr))
         except:
-            print 'Mr.Geppetto(server) is not working'
+            print 'Mr.Geppetto(kinect) is not working'
             server.close ()
             return
 
