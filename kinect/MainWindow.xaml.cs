@@ -253,6 +253,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         // @lfred: TODO send information to the proxy
         private void reportPos (Skeleton sk) {
+            dumpPositions (sk);
         }
 
         /// <summary>
