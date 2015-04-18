@@ -360,10 +360,31 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
         }
-
+        
+        private string dumpPoint (Skeleton skeleton, JointType j) 
+        {
+            SkeletonPoint sp = skeleton.Joints[j].Position;
+            string s = "(" + sp.X + ":" + sp.Y + ":" + sp.Z + ")";
+            return s;
+        }
+        
         private void dumpPositions (Skeleton skeleton)
         {
-            Trace.WriteLine ("");
+            SkeletonPoint sp;
+            
+            Trace.WriteLine ("------");
+            Trace.WriteLine ("Shoulder Center:" + dumpPoint (JointType.ShoulderCenter));
+            Trace.WriteLine ("---");
+            Trace.WriteLine ("Shoulder Left:" + dumpPoint (JointType.ShoulderLeft));
+            Trace.WriteLine ("Elbow Left:" + dumpPoint (JointType.ElbowLeft));
+            Trace.WriteLine ("Wrist Left:" + dumpPoint (JointType.WristLeft));
+            Trace.WriteLine ("Hand Left:" + dumpPoint (JointType.HandLeft));
+            Trace.WriteLine ("---");
+            Trace.WriteLine ("Shoulder Right:" + dumpPoint (JointType.ShoulderRight));
+            Trace.WriteLine ("Elbow Right:" + dumpPoint (JointType.ElbowRight));
+            Trace.WriteLine ("Shoulder Center:" + dumpPoint (JointType.WristRight));
+            Trace.WriteLine ("Shoulder Center:" + dumpPoint (JointType.HandLeft));
+            Trace.WriteLine ("------");
         }
 
         private double CalculatePanAngel (vec reference, vec target)
