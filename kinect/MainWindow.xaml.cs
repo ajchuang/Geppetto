@@ -1,15 +1,19 @@
-﻿//------------------------------------------------------------------------------
-// <copyright file="MainWindow.xaml.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
-
+﻿/*
+    1.  shoulder_pan:   arm - spine (0: front)
+    2.  shoulder_lift:  arm - shoulder (0: front, 1: down)
+    3.  upper_arm_roll: (calculated)
+    4.  elbow_flex:     arm-elbow (0: total straight)
+    5.  forearm row:    no way
+    6.  wrist flex:     no  
+    7.  wrist roll:     no
+ */
 namespace Microsoft.Samples.Kinect.SkeletonBasics
 {
     using System.IO;
     using System.Windows;
     using System.Windows.Media;
     using Microsoft.Kinect;
+    using System.Diagnostics;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -355,6 +359,16 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
 
             drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
+        }
+
+        private void dumpPositions (Skeleton skeleton)
+        {
+            Trace.WriteLine ("");
+        }
+
+        private double CalculatePanAngel (vec reference, vec target)
+        {
+            return 0.0;
         }
 
         /// <summary>
