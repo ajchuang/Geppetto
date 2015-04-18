@@ -3,12 +3,12 @@ using System.Diagnostics;
 
 class vec {
 
-    int m_x;
-    int m_y;
-    int m_z;
+    double m_x;
+    double m_y;
+    double m_z;
     double m_length;
 
-    public vec (int x, int y, int z) {
+    public vec (double x, double y, double z) {
         m_x = x;
         m_y = y;
         m_z = z;
@@ -16,13 +16,18 @@ class vec {
         m_length = Math.Sqrt (x*x + y*y + z*z);
     }
     
-    public int x () {return m_x;}
-    public int y () {return m_y;}
-    public int z () {return m_z;}
+    public double x () {return m_x;}
+    public double y () {return m_y;}
+    public double z () {return m_z;}
+    
+    public void set_x (double x) {return m_x = x;}
+    public void set_y (double y) {return m_y = y;}
+    public void set_z (double z) {return m_z = z;}
+    
     public double length () {return m_length; }
     
     /* calculate the dot */
-    public int dot (vec v) {
+    public double dot (vec v) {
         return 
             m_x * v.x () + 
             m_y * v.y () +

@@ -22,9 +22,12 @@ g_pub_kinect    = None
 g_pub_myo       = None
 
 # using ros function
-def send_ros (pub, cmd, ts, x, y, z):
-    print "ros send: {}:{}:{}:{}:{}".format (cmd, ts, x, y, z)
-    sent = cmd + ':' + ts + ':' + x + ':' + y + ':' + z
+def send_ros (pub, list):
+    
+    sent =        list[0] + ' ' + list[1] + ' ' + list[2] + ' ' + list[3]  + ' ' + list[4]  + ' ' + list[5]  + ' ' + list[6] + ' '
+    sent = sent + list[7] + ' ' + list[8] + ' ' + list[9] + ' ' + list[10] + ' ' + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
+    
+    print 'sendin {}'.format (sent)
     pub.publish (sent);
 
 def parse_input (data, pub):
@@ -42,15 +45,27 @@ def parse_input (data, pub):
         if tag != 'GO':
             print '{}'.format (tag)
             continue
-
-        cmd = g_tok_q.popleft () 
-        ts  = g_tok_q.popleft ()
-        x   = g_tok_q.popleft ()
-        y   = g_tok_q.popleft ()
-        z   = g_tok_q.popleft ()
+        
+        data = []
+        
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
+        
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
+        data.append (g_tok_q.popleft ())
         
         # send via ROS functions
-        send_ros (pub, cmd, ts, x, y, z)
+        send_ros (pub, data)
 
 def handler (pub, conn, addr):
     
@@ -60,7 +75,7 @@ def handler (pub, conn, addr):
         # Keep the client here
         while True:
             # get the new (raw) data
-            new_data = conn.recv (256)
+            new_data = conn.recv (1024)
             parse_input (new_data, pub)
             
     except rospy.ROSInterruptException:
