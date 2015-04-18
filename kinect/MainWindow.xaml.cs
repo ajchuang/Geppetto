@@ -371,20 +371,18 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         
         private void dumpPositions (Skeleton skeleton)
         {
-            SkeletonPoint sp;
-            
             Trace.WriteLine ("------");
-            Trace.WriteLine ("Shoulder Center:" + dumpPoint (JointType.ShoulderCenter));
+            Trace.WriteLine ("Shoulder Center:" + dumpPoint (skeleton, JointType.ShoulderCenter));
             Trace.WriteLine ("---");
-            Trace.WriteLine ("Shoulder Left:" + dumpPoint (JointType.ShoulderLeft));
-            Trace.WriteLine ("Elbow Left:" + dumpPoint (JointType.ElbowLeft));
-            Trace.WriteLine ("Wrist Left:" + dumpPoint (JointType.WristLeft));
-            Trace.WriteLine ("Hand Left:" + dumpPoint (JointType.HandLeft));
+            Trace.WriteLine("Shoulder Left:" + dumpPoint(skeleton, JointType.ShoulderLeft));
+            Trace.WriteLine("Elbow Left:" + dumpPoint(skeleton, JointType.ElbowLeft));
+            Trace.WriteLine("Wrist Left:" + dumpPoint(skeleton, JointType.WristLeft));
+            Trace.WriteLine("Hand Left:" + dumpPoint(skeleton, JointType.HandLeft));
             Trace.WriteLine ("---");
-            Trace.WriteLine ("Shoulder Right:" + dumpPoint (JointType.ShoulderRight));
-            Trace.WriteLine ("Elbow Right:" + dumpPoint (JointType.ElbowRight));
-            Trace.WriteLine ("Shoulder Center:" + dumpPoint (JointType.WristRight));
-            Trace.WriteLine ("Shoulder Center:" + dumpPoint (JointType.HandLeft));
+            Trace.WriteLine("Shoulder Right:" + dumpPoint(skeleton, JointType.ShoulderRight));
+            Trace.WriteLine("Elbow Right:" + dumpPoint(skeleton, JointType.ElbowRight));
+            Trace.WriteLine("Shoulder Center:" + dumpPoint(skeleton, JointType.WristRight));
+            Trace.WriteLine("Shoulder Center:" + dumpPoint(skeleton, JointType.HandLeft));
             Trace.WriteLine ("------");
         }
 

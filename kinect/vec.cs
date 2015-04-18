@@ -31,7 +31,7 @@ class vec {
     
     public double angle (vec v) {
         
-        if (v.length == 0 || m_length == 0) {
+        if (v.length () < 0.01 || m_length < 0.01) {
             Debug.WriteLine ("Error: zero length vector");
             return 0.0;
         }
