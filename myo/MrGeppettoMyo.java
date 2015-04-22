@@ -120,6 +120,12 @@ public class MrGeppettoMyo {
                         err ("Network failure - Mr.Geppetto feels sorry.");
                         break;
                     }
+
+                    /* do recording */
+                    if (dc.isRecording ()) {
+                        long offset = dc.getRecTimeOffset ();
+                        MrGeppettoMyo.log ("[Rec] " + out + "@" + offset);
+                    }
 			    }
             }
 

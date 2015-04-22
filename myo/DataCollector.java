@@ -15,6 +15,8 @@ public class DataCollector extends AbstractDeviceListener {
     
     /* members */
     private boolean m_isOn;
+    private boolean m_isRecording;
+    private long m_beginRecTime;
     private double rollW;
     private double pitchW;
     private double yawW;
@@ -28,6 +30,7 @@ public class DataCollector extends AbstractDeviceListener {
 	    pitchW  = 0;
 	    yawW    = 0;
         m_isOn  = false;
+        m_beginRecTime = 0;
 	    currentPose = new Pose ();
     }
 
@@ -74,6 +77,19 @@ public class DataCollector extends AbstractDeviceListener {
         if (currentPose.getType () == PoseType.FIST) {
 	        myo.vibrate (VibrationType.VIBRATION_MEDIUM);
 	    }
+
+        /* toggle the recording */
+        if (currentPose.getType () == PoseType.DOUBLE_TAP) {
+	        /* vib the armband */
+            myo.vibrate (VibrationType.VIBRATION_MEDIUM);
+            m_isRecording = !m_isRecording;
+
+            if (m_isRecording) {
+                m_beginRecTime = System.currentTimeMillis ();
+            } else {
+                m_beginRecTime = 0;
+            }
+        }
     }
 
     @Override
@@ -126,6 +142,14 @@ public class DataCollector extends AbstractDeviceListener {
 
     public boolean isConnected () {
         return m_isOn;
+    }
+
+    public boolean isRecording () {
+        return m_isRecording;
+    }
+
+    public long getRecTimeOffset () {
+        return System.currentTimeMillis () - m_beginRecTime;
     }
 
     public String getRoll () {
