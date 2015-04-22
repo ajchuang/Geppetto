@@ -6,6 +6,7 @@ import com.thalmic.myo.enums.Arm;
 import com.thalmic.myo.enums.PoseType;
 import com.thalmic.myo.enums.VibrationType;
 import com.thalmic.myo.enums.XDirection;
+import com.thalmic.myo.FirmwareVersion;
 
 public class DataCollector extends AbstractDeviceListener {
     
@@ -13,21 +14,37 @@ public class DataCollector extends AbstractDeviceListener {
     static final int SCALE = 18;
     
     /* members */
+    private boolean m_isOn;
     private double rollW;
     private double pitchW;
     private double yawW;
     private Pose currentPose;
     private Arm whichArm;
 
+    public static void log (String s) { System.err.println ("  [DCR] " + s); }
+
     public DataCollector () {
-        rollW = 0;
-	    pitchW = 0;
-	    yawW = 0;
+        rollW   = 0;
+	    pitchW  = 0;
+	    yawW    = 0;
+        m_isOn  = false;
 	    currentPose = new Pose ();
     }
 
     @Override
-    public void onOrientationData(Myo myo, long timestamp, Quaternion rotation) {
+    public void onConnect (Myo myo, long timestamp, FirmwareVersion firmwareVersion) {
+        log ("device connected");
+        m_isOn = true;
+    }
+
+    @Override
+    public void onDisconnect (Myo myo, long timestamp) {
+        log ("device disconnected");
+        m_isOn = false;
+    }
+
+    @Override
+    public void onOrientationData (Myo myo, long timestamp, Quaternion rotation) {
 	
         Quaternion normalized = rotation.normalized();
 
@@ -44,9 +61,9 @@ public class DataCollector extends AbstractDeviceListener {
                 2.0f * (normalized.getW() * normalized.getZ() + normalized.getX() * normalized.getY()),
                 1.0f - 2.0f * (normalized.getY() * normalized.getY() + normalized.getZ() * normalized.getZ()));
 
-	    rollW = ((roll + Math.PI) / (Math.PI * 2.0) * SCALE);
-	    pitchW = ((pitch + Math.PI / 2.0) / Math.PI * SCALE);
-	    yawW = ((yaw + Math.PI) / (Math.PI * 2.0) * SCALE);
+	    rollW   = ((roll + Math.PI) / (Math.PI * 2.0) * SCALE);
+	    pitchW  = ((pitch + Math.PI / 2.0) / Math.PI * SCALE);
+	    yawW    = ((yaw + Math.PI) / (Math.PI * 2.0) * SCALE);
     }
 
     @Override
@@ -67,14 +84,6 @@ public class DataCollector extends AbstractDeviceListener {
     @Override
     public void onArmUnsync (Myo myo, long timestamp) {
 	    whichArm = null;
-    }
-
-    String printAngle (double angle) {
-    
-        return String.format (
-                    "[%s%s]",
-                    repeatCharacter ('*', (int)angle),
-                    repeatCharacter (' ', (int) (SCALE - angle)));
     }
 
     @Override
@@ -106,6 +115,29 @@ public class DataCollector extends AbstractDeviceListener {
 	    builder.append(armString);
 	    builder.append(poseString);
 	    return builder.toString();
+    }
+
+    String printAngle (double angle) {
+        return String.format (
+                    "[%s%s]",
+                    repeatCharacter ('*', (int)angle),
+                    repeatCharacter (' ', (int) (SCALE - angle)));
+    }
+
+    public boolean isConnected () {
+        return m_isOn;
+    }
+
+    public String getRoll () {
+        return printAngle (rollW);
+    }
+
+    public String getPose () {
+        if (currentPose.getType () == PoseType.FIST) {
+            return new String ("open");
+        } else {
+            return new String ("close");
+        }
     }
 
     private String repeatCharacter (char character, int numOfTimes) {

@@ -7,12 +7,15 @@ import com.thalmic.myo.Myo;
 
 public class MrGeppettoMyo {
 
+    final static int M_MONITOR_INTR = 500;
+    final static int M_WAIT_INTR    = 5000;
+
     int m_port;
     String m_host;
-    Socket m_socket; //= new Socket ("localhost", 6789);
+    Socket m_socket;
     DataOutputStream m_outStream;
 
-    public MrGeppetto (String host, int port) {
+    public MrGeppettoMyo (String host, int port) {
         
         m_host = host;
         m_port = port;
@@ -28,22 +31,24 @@ public class MrGeppettoMyo {
             m_outStream = new DataOutputStream (m_socket.getOutputStream ()); 
             return true;
         } catch (Exception e) {
-            log (e);
+            MrGeppettoMyo.err (e.toString ());
             e.printStackTrace ();
         }
 
         return false;
     }
 
-    public boolean send (String) {
+    public boolean send (String info) {
         
         try {
 
             /* send over TCP */
-            
+            m_outStream.writeChars (info);
+            m_outStream.flush ();
             return true;
 
         } catch (Exception e) {
+            MrGeppettoMyo.err (e.toString ());
             e.printStackTrace ();
         }
 
@@ -55,13 +60,13 @@ public class MrGeppettoMyo {
             m_outStream.close ();
             m_socket.close ();
         } catch (Exception e) {
-            log (e);
+            MrGeppettoMyo.err (e.toString ());
             e.printStackTrace ();
         }
     }
 
     public static void log (String s) { System.err.println (s); }
-    public static void err (String s) { "[Error] " + System.err.println (s); }
+    public static void err (String s) { System.err.println ("[Error] " + s); }
 
     public static void main (String[] args) {
 
@@ -82,33 +87,48 @@ public class MrGeppettoMyo {
             
             for (int i=0; i<10 && device == null; ++i) {
 			    log ("Attempting to find a Myo...");
-			    device = hub.waitForMyo (5000);
+			    device = hub.waitForMyo (M_WAIT_INTR);
             }
 
             if (device == null) {
-                err ("Unable to find a Myo.");
+                err ("Unable to find a Myo armband.");
                 return;
             }
 
             /* attach the device listener */
-			DeviceListener dataCollector = new DataCollector();
-			hub.addListener (dataCollector);
+			DataCollector dc = new DataCollector ();
+			hub.addListener ((DeviceListener)dc);
 
             /* establish the connection */
-            MrGeppetto mg = new MrGeppetto (host, port);
+            MrGeppettoMyo mg = new MrGeppettoMyo (host, port);
             
-            if (mg.connect () == false) {
+            if (mg.connect (host, port) == false) {
                 err ("Failed to connect to the host");
-                return false;
+                return;
             }
 
 			while (true) {
                 /* report per 0.5 seconds */
-				hub.run (1000 / 200);
-				log ("[Status] " + dataCollector);
-			}
+				hub.run (M_MONITOR_INTR);
+                
+                /* send data only when connected */
+                if (dc.isConnected ()) {
+                    String out = "GO " + dc.getPose () + " " + dc.getRoll ();
+				    if (mg.send (out)) {
+                        log ("[Status] " + dc.toString ());
+                    } else {
+                        err ("Network failure - Mr.Geppetto feels sorry.");
+                        break;
+                    }
+			    }
+            }
+
+            err ("Bad thing happens");
+            return;
+
 		} catch (Exception e) {
-			e.printStackTrace ();
+			MrGeppettoMyo.err ("Ooops: Mr.Geppetto is sick - ");
+            e.printStackTrace ();
 			System.exit (1);
 		}
 	}
