@@ -9,9 +9,9 @@ import rospy
 from std_msgs.msg import String
 
 # global variabls
-g_tok_q = deque ()
-g_host  = socket.gethostbyname (socket.gethostname ())
-g_myo_port     = 4001
+g_tok_q     = deque ()
+g_host      = socket.gethostbyname (socket.gethostname ())
+g_myo_port  = 4006
 
 # global variables for ROS publisher
 g_pub_myo       = None
@@ -19,9 +19,7 @@ g_pub_myo       = None
 # using ros function
 def send_ros (pub, list):
     
-    sent =        list[0] + ' ' + list[1] + ' ' + list[2] + ' ' + list[3]  + ' ' + list[4]  + ' ' + list[5]  + ' ' + list[6] + ' '
-    sent = sent + list[7] + ' ' + list[8] + ' ' + list[9] + ' ' + list[10] + ' ' + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
-    
+    sent = list[0] + ' ' + list[1] + ' ' + list[2]
     print 'sendin {}'.format (sent)
     pub.publish (sent);
 
@@ -32,8 +30,6 @@ def parse_input (data, pub):
     
     while len(g_tok_q) > 0:
 
-        print 'test 0'
-
         # check 'Go' tag
         tag = g_tok_q.popleft ()
          
@@ -43,18 +39,6 @@ def parse_input (data, pub):
         
         data = []
         
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
         data.append (g_tok_q.popleft ())
         data.append (g_tok_q.popleft ())
         data.append (g_tok_q.popleft ())
@@ -72,7 +56,7 @@ def handler (pub, conn, addr):
         while True:
             # get the new (raw) data
             new_data = conn.recv (1024)
-            parse_input (new_data, pub)
+            parse_input (new_data.strip(), pub)
             
     except rospy.ROSInterruptException:
         print 'ros interrupt exception'
@@ -119,10 +103,10 @@ if __name__ == "__main__":
         sys.exit ()
     
     print 'Initialize ROS nodes - myo'
-    g_pub_myo   = rospy.Publisher ('myo',   String, queue_size=10)
+    g_pub_myo = rospy.Publisher ('myo',   String, queue_size=10)
     rospy.init_node ('myo', anonymous=True)
     rate = rospy.Rate (10) # 10hz
     
     # starting the server
-    print 'Starting Mr.Geppetto server @ {}:{}'.format(g_host, g_myo_port)
+    print 'Starting Mr.Geppetto (myo) server @ {}:{}'.format(g_host, g_myo_port)
     myo_server_thread ()

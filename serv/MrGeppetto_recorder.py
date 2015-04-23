@@ -1,106 +1,71 @@
 import os
+import os.path
 import sys
 import socket
 import thread
 from collections import deque
 
-# ros imports
-import rospy
-from std_msgs.msg import String
-
 # global variabls
 g_tok_q = deque ()
-g_host  = socket.gethostbyname (socket.gethostname ())
-g_myo_port     = 4001
+g_host  = 'localhost'
+g_port  = 4008
+g_isRec = False
+g_fname = None
+g_fh    = None
 
-# global variables for ROS publisher
-g_pub_myo       = None
+def next_file_name ():
+    num = 1
 
-# using ros function
-def send_ros (pub, list):
+    while True:
+        file_name = 'recording_%d.txt' % num
+        
+        if not os.path.exists (file_name):
+            return file_name
+        
+        num += 1
+
+def data_handler (data):
     
-    sent =        list[0] + ' ' + list[1] + ' ' + list[2] + ' ' + list[3]  + ' ' + list[4]  + ' ' + list[5]  + ' ' + list[6] + ' '
-    sent = sent + list[7] + ' ' + list[8] + ' ' + list[9] + ' ' + list[10] + ' ' + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
-    
-    print 'sendin {}'.format (sent)
-    pub.publish (sent);
-
-def parse_input (data, pub):
-
-    # add the new input to the token queue
-    g_tok_q.extend (data.strip().split (' '));
-    
-    while len(g_tok_q) > 0:
-
-        print 'test 0'
-
-        # check 'Go' tag
-        tag = g_tok_q.popleft ()
-         
-        if tag != 'GO':
-            print '{}'.format (tag)
-            continue
-        
-        data = []
-        
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        
-        # send via ROS functions
-        send_ros (pub, data)
-        return;
-
-def handler (pub, conn, addr):
-    
-    try:
-        print 'handler started'
-        
-        # Keep the client here
-        while True:
-            # get the new (raw) data
-            new_data = conn.recv (1024)
-            parse_input (new_data, pub)
+    if g_isRec:
+        if data == 'STOP':
+            g_fh.close ()
+            print 'Recording completed - ' + g_fname
             
-    except rospy.ROSInterruptException:
-        print 'ros interrupt exception'
-        pass
-            
-def myo_server_thread ():
+            g_fh = None
+            g_isRec = False
+            g_fname = next_file_name ()
+        else:
+            if data == 'START':
+                return
+            g_fh.write (data + '\n')
+    else:
+        if data == 'START':
+            print 'Start to record @ ' + g_fname
+            g_fname = next_filename ()
+            g_fh = open (g_fname, 'a')
+        else:
+            if data == 'STOP':
+                return
+            g_fh.write (data + '\n')
+
+
+def recorder_server_thread ():
     
     server = None
 
     try:
-        server = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
-        server.bind ((g_host, g_myo_port))
-        server.listen (10)
+        server = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
+        server.bind ((g_host, g_port))
     except:
-        print 'failed to start Mr.Geppetto'
+        print 'failed to start Mr.Geppetto (Rec)'
         sys.exit ()
     
     # starting the server loop
     while True:
-        try:
-            conn, addr = server.accept ()
-            print 'Connected with ' + addr[0] + ':' + str(addr[1])
-            
-            thread.start_new_thread (handler, (g_pub_myo, conn, addr))
-        except:
-            print 'Mr.Geppetto(myo) is not working'
-            server.close ()
-            return
+        data,addr = server.recvfrom (1024)
+        print data.strip(), addr
+        data_handler (data.strip ())
+
 
 # main function
 if __name__ == "__main__":
@@ -110,7 +75,7 @@ if __name__ == "__main__":
     
     if argc == 3:
         g_host = sys.argv[1]
-        g_myo_port = int (sys.argv[2])
+        g_port = int (sys.argv[2])
     elif argc == 1:
         # use default
         pass
@@ -118,11 +83,6 @@ if __name__ == "__main__":
         print 'incorrect params'
         sys.exit ()
     
-    print 'Initialize ROS nodes - myo'
-    g_pub_myo   = rospy.Publisher ('myo',   String, queue_size=10)
-    rospy.init_node ('myo', anonymous=True)
-    rate = rospy.Rate (10) # 10hz
-    
     # starting the server
-    print 'Starting Mr.Geppetto server @ {}:{}'.format(g_host, g_myo_port)
-    myo_server_thread ()
+    print 'Starting Mr.Geppetto recorder @ {}:{}'.format(g_host, g_port)
+    recorder_server_thread ()
