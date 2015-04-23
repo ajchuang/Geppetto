@@ -4,6 +4,7 @@ import sys
 import socket
 import thread
 import utili
+from time import sleep
 from datetime import datetime
 from collections import deque
 
@@ -17,17 +18,27 @@ def init_conn ():
     g_sock_kinect = None
     g_sock_myo = None
 
+def send_kinect_cmd (toks):
+    sock.send (cmd) 
+
+def send_myo_cmd (toks):
+    g_sock_myo.send ()
+
 def exec_line (cmd, startTime):
     
     toks = line.split () 
+    dev = toks[1]
     etime = int (toks[0])
-    ctime = int (round (time.time ()
+    ctime = int (datetime.datetime.now ())
 
     # recording format:
     #   time dev data...   
-    while abs (ctime - st) - etime) < g_diff:
+    # waiting for execution time
+    while ctime - startTime < 0:
+        sleep (0.05)
+        ctime = int (datetime.datetime.now ())
+        
         print 'exec {' + line + '} @ ' + ctime
-        dev = toks[2]
 
         if dev == 'KNCT':
             break;
@@ -37,7 +48,7 @@ def exec_line (cmd, startTime):
 
 def replay ():
 
-    st = int (datetime.datetime.now () 
+    st = int (datetime.datetime.now ())
     print 'starting time: ' + st
 
     with open (g_fname) as rec:

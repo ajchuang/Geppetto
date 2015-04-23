@@ -1,3 +1,5 @@
+g_testing_mode = True
+
 import os
 import sys
 import socket
@@ -5,9 +7,10 @@ import thread
 import util
 from collections import deque
 
-# ros imports
-import rospy
-from std_msgs.msg import String
+if not g_testing_mode:
+    # ros imports
+    import rospy
+    from std_msgs.msg import String
 
 # global variabls
 g_tok_q     = deque ()
@@ -28,9 +31,11 @@ def send_rec (lst):
 
 # using ros function
 def send_ros (pub, lst):
-    sent = lst[0] + ' ' + lst[1] + ' ' + lst[2]
-    print 'sendin {}'.format (sent)
-    pub.publish (sent)
+
+    if not g_testing_mode:
+        sent = lst[0] + ' ' + lst[1] + ' ' + lst[2]
+        print 'sendin {}'.format (sent)
+        pub.publish (sent)
 
 def parse_input (data, pub):
 
@@ -105,9 +110,10 @@ if __name__ == "__main__":
     g_rec_host, g_rec_port = util.read_conf ('recorder')    
 
     print 'Initialize ROS nodes - myo'
-    g_pub_myo = rospy.Publisher ('myo',   String, queue_size=10)
-    rospy.init_node ('myo', anonymous=True)
-    rate = rospy.Rate (10) # 10hz
+    if not g_testing_mode:
+        g_pub_myo = rospy.Publisher ('myo',   String, queue_size=10)
+        rospy.init_node ('myo', anonymous=True)
+        rate = rospy.Rate (10) # 10hz
     
     # starting the server
     print 'Starting Mr.Geppetto (myo) server @ {}:{}'.format(g_host, g_myo_port)

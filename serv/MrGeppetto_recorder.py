@@ -15,6 +15,7 @@ g_port  = 4008
 g_isRec = False
 g_fname = None
 g_fh    = None
+g_beginTime = None
 
 def data_handler (data):
     
@@ -26,19 +27,20 @@ def data_handler (data):
             g_fh = None
             g_isRec = False
             g_fname = next_file_name ()
+            g_beginTime = None
         else:
             if data == 'START':
                 return
-            g_fh.write (data + '\n')
+            
+            curTime = int (datetime.datetime.now ())
+            
+            g_fh.write ((curTime - g_beginTime) + data + '\n')
     else:
         if data == 'START':
             print 'Start to record @ ' + g_fname
             g_fname = next_filename ()
             g_fh = open (g_fname, 'a')
-        else:
-            if data == 'STOP':
-                return
-            g_fh.write (data + '\n')
+            g_beginTime = int (datetime.datetime.now ())
 
 def recorder_server_thread ():
 

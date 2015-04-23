@@ -4,6 +4,7 @@ import java.net.*;
 import com.thalmic.myo.DeviceListener;
 import com.thalmic.myo.Hub;
 import com.thalmic.myo.Myo;
+import com.thalmic.myo.Pose;
 
 public class MrGeppettoMyo {
 
@@ -113,9 +114,12 @@ public class MrGeppettoMyo {
                 
                 /* send data only when connected */
                 if (dc.isConnected ()) {
-                    String out = "GO " + dc.getPose () + " " + dc.getRoll ();
-				    if (mg.send (out)) {
-                        log ("[Status] " + dc.toString ());
+
+                    String newPose = dc.getPose ();
+                    String out = "GO " + newPose + " " + dc.getRoll ();
+
+                    if (mg.send (out)) {
+                        //log ("[Status] " + dc.toString ());
                     } else {
                         err ("Network failure - Mr.Geppetto feels sorry.");
                         break;

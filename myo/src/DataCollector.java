@@ -73,15 +73,17 @@ public class DataCollector extends AbstractDeviceListener {
     public void onPose (Myo myo, long timestamp, Pose pose) {
 	    
         currentPose = pose;
-	
+
         if (currentPose.getType () == PoseType.FIST) {
-	        myo.vibrate (VibrationType.VIBRATION_MEDIUM);
+	        myo.vibrate (VibrationType.VIBRATION_SHORT);
+	        myo.vibrate (VibrationType.VIBRATION_SHORT);
 	    }
 
         /* toggle the recording */
-        if (currentPose.getType () == PoseType.DOUBLE_TAP) {
-	        /* vib the armband */
-            myo.vibrate (VibrationType.VIBRATION_MEDIUM);
+        if (currentPose.getType () == PoseType.WAVE_IN) {
+	        
+            /* vib the armband */
+            myo.vibrate (VibrationType.VIBRATION_SHORT);
             m_isRecording = !m_isRecording;
 
             if (m_isRecording) {
@@ -107,8 +109,8 @@ public class DataCollector extends AbstractDeviceListener {
 	    StringBuilder builder = new StringBuilder("\r");
 
 	    String xDisplay = printAngle (rollW); 
-	    String yDisplay = printAngle (pitchW); 
-	    String zDisplay = printAngle (yawW); 
+	    //String yDisplay = printAngle (pitchW); 
+	    //String zDisplay = printAngle (yawW); 
 
 	    String armString = null;
 	    if (whichArm != null) {
@@ -126,8 +128,8 @@ public class DataCollector extends AbstractDeviceListener {
 	    }
 
 	    builder.append(xDisplay);
-	    builder.append(yDisplay);
-	    builder.append(zDisplay);
+	    //builder.append(yDisplay);
+	    //builder.append(zDisplay);
 	    builder.append(armString);
 	    builder.append(poseString);
 	    return builder.toString();
