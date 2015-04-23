@@ -7,73 +7,36 @@ import util
 from collections import deque
 
 # global variabls
-g_tok_q = deque ()
-g_host  = 'localhost'
-g_port  = 4008
-g_isRec = False
 g_fname = None
-g_fh    = None
+g_sock_kinect = None
+g_sock_myo = None
 
-def next_file_name ():
-    num = 1
+def init_conn ():
+    g_sock_kinect = None
+    g_sock_myo = None
 
-    while True:
-        file_name = 'recording_%d.txt' % num
-        
-        if not os.path.exists (file_name):
-            return file_name
-        
-        num += 1
-
-def data_handler (data):
-    
-    if g_isRec:
-        if data == 'STOP':
-            g_fh.close ()
-            print 'Recording completed - ' + g_fname
-            
-            g_fh = None
-            g_isRec = False
-            g_fname = next_file_name ()
-        else:
-            if data == 'START':
-                return
-            g_fh.write (data + '\n')
-    else:
-        if data == 'START':
-            print 'Start to record @ ' + g_fname
-            g_fname = next_filename ()
-            g_fh = open (g_fname, 'a')
-        else:
-            if data == 'STOP':
-                return
-            g_fh.write (data + '\n')
-
-
-def recorder_server_thread ():
-    
-    server = None
-
-    try:
-        server = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
-        server.bind ((g_host, g_port))
-    except Exception as e:
-        print 'failed to start Mr.Geppetto (Rec)'
-        print e
-        sys.exit ()
-    
-    # starting the server loop
-    while True:
-        data,addr = server.recvfrom (1024)
-        print data.strip(), addr
-        data_handler (data.strip ())
-
+def replay ():
+    with open (g_fname) as rec:
+        for line in rec :
+            print '  [Log] ' + line
 
 # main function
 if __name__ == "__main__":
-    
-    g_host, g_port = util.read_conf ('recorder');
+   
+    if (len (sys.argv) != 2)
+        print '[Error] Please specify recording file correctly'
+        print '[Usage] python MrGeppetto_replay.py [recording]'
+        return
 
+    g_fname = sys.argv[1]
+    
+    if not os.path.isfile (g_fname):
+        print '[Error] Recording file ' + g_fname + ' does not exist'
+        return
+    else:
+        print 'Replaying file: ' + g_fname
+
+    g_host, g_port = util.read_conf ('recorder');
+    
     # starting the server
-    print 'Starting Mr.Geppetto recorder @ {}:{}'.format(g_host, g_port)
-    recorder_server_thread ()
+    replay ()

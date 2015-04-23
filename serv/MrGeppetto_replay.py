@@ -5,6 +5,8 @@ import socket
 import thread
 from collections import deque
 
+import util
+
 # global variabls
 g_tok_q = deque ()
 g_host  = 'localhost'
@@ -70,19 +72,9 @@ def recorder_server_thread ():
 # main function
 if __name__ == "__main__":
     
-    # Param processing
-    argc = len (sys.argv) 
-    
-    if argc == 3:
-        g_host = sys.argv[1]
-        g_port = int (sys.argv[2])
-    elif argc == 1:
-        # use default
-        pass
-    else:
-        print 'incorrect params'
-        sys.exit ()
-    
+    dic = util.read_all_conf ()
+    print dic
+
     # starting the server
     print 'Starting Mr.Geppetto recorder @ {}:{}'.format(g_host, g_port)
     recorder_server_thread ()
