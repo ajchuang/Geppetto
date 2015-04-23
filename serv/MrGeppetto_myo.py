@@ -13,16 +13,24 @@ from std_msgs.msg import String
 g_tok_q     = deque ()
 g_host      = socket.gethostbyname (socket.gethostname ())
 g_myo_port  = 4006
+g_rec_host  = None
+g_rec_port  = None
+g_trans     = list ();
+g_trans_len = 3
 
 # global variables for ROS publisher
 g_pub_myo       = None
 
+def send_rec (lst):
+    sent = 'MYO ' + lst[0] + ' ' + lst[1] + ' ' + lst[2]
+    sock = socket.socket (socket.AF_INET, socket.SOCK_DGRAM) # UDP
+    sock.sendto (sent, (g_rec_host, int(g_rec_port)))
+
 # using ros function
-def send_ros (pub, list):
-    
-    sent = list[0] + ' ' + list[1] + ' ' + list[2]
+def send_ros (pub, lst):
+    sent = lst[0] + ' ' + lst[1] + ' ' + lst[2]
     print 'sendin {}'.format (sent)
-    pub.publish (sent);
+    pub.publish (sent)
 
 def parse_input (data, pub):
 
@@ -36,16 +44,19 @@ def parse_input (data, pub):
          
         if tag != 'GO':
             print '{}'.format (tag)
+            g_trans.append (tag)
             continue
-        
-        data = []
-        
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        
+        else:
+            g_trans.append (tag)
+       
+        # check if the condition is met.
+        if len(g_trans) == g_trans_len:
+            send_ros (pub, data);
+            g_trans = []
+
         # send via ROS functions
-        send_ros (pub, data)
+        send_ros (pub, g_trans)
+        send_rec (g_trans) 
         return;
 
 def handler (pub, conn, addr):
@@ -91,7 +102,8 @@ def myo_server_thread ():
 if __name__ == "__main__":
     
     g_host, g_myo_port = util.read_conf ('myo') 
-    
+    g_rec_host, g_rec_port = util.read_conf ('recorder')    
+
     print 'Initialize ROS nodes - myo'
     g_pub_myo = rospy.Publisher ('myo',   String, queue_size=10)
     rospy.init_node ('myo', anonymous=True)
