@@ -3,6 +3,7 @@ import os.path
 import sys
 import socket
 import thread
+import util
 from collections import deque
 
 # global variabls
@@ -56,8 +57,9 @@ def recorder_server_thread ():
     try:
         server = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
         server.bind ((g_host, g_port))
-    except:
+    except Exception as e:
         print 'failed to start Mr.Geppetto (Rec)'
+        print e
         sys.exit ()
     
     # starting the server loop
@@ -70,19 +72,8 @@ def recorder_server_thread ():
 # main function
 if __name__ == "__main__":
     
-    # Param processing
-    argc = len (sys.argv) 
-    
-    if argc == 3:
-        g_host = sys.argv[1]
-        g_port = int (sys.argv[2])
-    elif argc == 1:
-        # use default
-        pass
-    else:
-        print 'incorrect params'
-        sys.exit ()
-    
+    g_host, g_port = util.read_conf ('recorder');
+
     # starting the server
     print 'Starting Mr.Geppetto recorder @ {}:{}'.format(g_host, g_port)
     recorder_server_thread ()

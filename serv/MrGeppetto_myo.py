@@ -2,6 +2,7 @@ import os
 import sys
 import socket
 import thread
+import util
 from collections import deque
 
 # ros imports
@@ -89,18 +90,7 @@ def myo_server_thread ():
 # main function
 if __name__ == "__main__":
     
-    # Param processing
-    argc = len (sys.argv) 
-    
-    if argc == 3:
-        g_host = sys.argv[1]
-        g_myo_port = int (sys.argv[2])
-    elif argc == 1:
-        # use default
-        pass
-    else:
-        print 'incorrect params'
-        sys.exit ()
+    g_host, g_myo_port = util.read_conf ('myo') 
     
     print 'Initialize ROS nodes - myo'
     g_pub_myo = rospy.Publisher ('myo',   String, queue_size=10)

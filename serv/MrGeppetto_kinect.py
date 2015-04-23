@@ -2,6 +2,7 @@ import os
 import sys
 import socket
 import thread
+import util
 from collections import deque
 
 # ros imports
@@ -107,19 +108,7 @@ def kinect_server_thread ():
 # main function
 if __name__ == "__main__":
     
-    # Param processing
-    argc = len (sys.argv) 
-    
-    if argc == 3:
-        g_host = sys.argv[1]
-        g_kinect_port = int (sys.argv[2])
-    elif argc == 1:
-        # use default
-        pass
-    else:
-        print '[Error] incorrect params'
-        print '[Usage] python MrGeppetto.py [HOST] [PORT]'
-        sys.exit ()
+    g_host, g_kinect_port = util.read_conf ('kinect')
         
     # init ros nodes
     print 'Initialize ROS nodes - kinect'
