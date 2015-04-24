@@ -8,7 +8,7 @@ import com.thalmic.myo.Pose;
 
 public class MrGeppettoMyo {
 
-    final static int M_MONITOR_INTR = 500;
+    final static int M_MONITOR_INTR = 250;
     final static int M_WAIT_INTR    = 5000;
 
     int m_port;
@@ -119,7 +119,7 @@ public class MrGeppettoMyo {
                     String out = "GO " + newPose + " " + dc.getRoll ();
 
                     if (mg.send (out)) {
-                        //log ("[Status] " + dc.toString ());
+                        log ("[Status] " + dc.toString ());
                     } else {
                         err ("Network failure - Mr.Geppetto feels sorry.");
                         break;
@@ -128,7 +128,7 @@ public class MrGeppettoMyo {
                     /* do recording */
                     if (dc.isRecording ()) {
                         long offset = dc.getRecTimeOffset ();
-                        MrGeppettoMyo.log ("[Rec] " + out + "@" + offset);
+                        //MrGeppettoMyo.log ("[Rec] " + out + "@" + offset);
                     }
 			    }
             }

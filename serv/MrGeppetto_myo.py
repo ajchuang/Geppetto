@@ -1,3 +1,4 @@
+# Compile option 
 g_testing_mode = True
 
 import os
@@ -22,7 +23,7 @@ g_trans     = list ();
 g_trans_len = 3
 
 # global variables for ROS publisher
-g_pub_myo       = None
+g_pub_myo   = None
 
 def send_rec (lst):
     sent = 'MYO ' + lst[0] + ' ' + lst[1] + ' ' + lst[2]
@@ -56,11 +57,10 @@ def parse_input (data, pub):
        
         # check if the condition is met.
         if len(g_trans) == g_trans_len:
-            send_ros (pub, data);
+            send_ros (pub, g_trans);
             g_trans = []
 
         # send via ROS functions
-        send_ros (pub, g_trans)
         send_rec (g_trans) 
         return;
 
@@ -105,7 +105,7 @@ def myo_server_thread ():
 
 # main function
 if __name__ == "__main__":
-    
+   
     g_host, g_myo_port = util.read_conf ('myo') 
     g_rec_host, g_rec_port = util.read_conf ('recorder')    
 

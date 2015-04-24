@@ -82,16 +82,30 @@ public class DataCollector extends AbstractDeviceListener {
         /* toggle the recording */
         if (currentPose.getType () == PoseType.WAVE_IN) {
 	        
+            System.err.println ("[Pose] wave-in");
+
             /* vib the armband */
             myo.vibrate (VibrationType.VIBRATION_SHORT);
-            m_isRecording = !m_isRecording;
+
+            if (!m_isRecording) {
+                m_isRecording = true;
+                m_beginRecTime = System.currentTimeMillis ();
+            }
+        }
+
+        if (currentPose.getType () == PoseType.WAVE_OUT) {
+	        
+            System.err.println ("[Pose] wave-out");
+
+            /* vib the armband */
+            myo.vibrate (VibrationType.VIBRATION_SHORT);
 
             if (m_isRecording) {
-                m_beginRecTime = System.currentTimeMillis ();
-            } else {
+                m_isRecording = false;
                 m_beginRecTime = 0;
             }
         }
+
     }
 
     @Override
