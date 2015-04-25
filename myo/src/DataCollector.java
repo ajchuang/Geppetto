@@ -169,7 +169,7 @@ public class DataCollector extends AbstractDeviceListener {
     }
 
     public String getRoll () {
-        return printAngle (rollW);
+        return Double.toString (rollW / SCALE);
     }
 
     public String getPose () {
