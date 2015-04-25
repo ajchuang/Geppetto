@@ -30,6 +30,7 @@ class OculusThread(threading.Thread):
 def sendROS(pub, sendStr):
     sendList = sendStr.strip().split()
     if sendList[0] == "s":
+        sendList = sendList[4:7]
         newStr = '  '.join(sendList)
         pub.publish(sendStr)
     return
