@@ -1,4 +1,4 @@
-import socket, sys, threading, time, os, signal, util
+import socket, sys, threading, time, os, signal
 
 #ros imports
 import rospy
@@ -55,6 +55,7 @@ def main():
     print "[*] " + "\n\nOculus bridge server started\n\n"
     
     pub = rospy.Publisher('Oculus', String, queue_size=10)
+    rospy.init_node('Oculus', anonymous = True)
     signal.signal(signal.SIGINT, gracefulExit)
     port = 10000
     SERVER_SOCKET.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  
