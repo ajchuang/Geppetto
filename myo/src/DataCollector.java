@@ -171,7 +171,7 @@ public class DataCollector extends AbstractDeviceListener {
     }
 
     public int getRoll () {
-        return (int)rollW;
+        return (int)(rollW - 8) * 20;
     }
 
     public String getPose () {

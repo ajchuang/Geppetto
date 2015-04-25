@@ -8,7 +8,7 @@ import com.thalmic.myo.Pose;
 
 public class MrGeppettoMyo {
 
-    final static int M_MONITOR_INTR = 250;
+    final static int M_MONITOR_INTR = 50;
     final static int M_WAIT_INTR    = 5000;
 
     int m_port;
