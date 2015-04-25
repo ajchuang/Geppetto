@@ -1,9 +1,9 @@
 #!/bin/bash
 echo 'Start Geppetto (recorder)'
-python MrGeppetto_recorder.py   $1 4002 &
+python MrGeppetto_recorder.py &
 
 echo 'Start Geppetto (kinect)'
-python MrGeppetto_kinect.py     $1 4000 &
+python MrGeppetto_kinect.py &
 
 echo 'Start Geppetto (myo)'
-python MrGeppetto_myo.py        $1 4001 &
+python MrGeppetto_myo.py &

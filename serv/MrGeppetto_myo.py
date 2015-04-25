@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # Compile option 
 g_testing_mode = True
 
@@ -15,20 +16,25 @@ if not g_testing_mode:
 
 # global variabls
 g_tok_q     = deque ()
-g_host      = socket.gethostbyname (socket.gethostname ())
-g_myo_port  = 4006
+g_host      = None
+g_myo_port  = None
 g_rec_host  = None
 g_rec_port  = None
 g_trans     = list ();
 g_trans_len = 3
+g_is_rec    = False
 
 # global variables for ROS publisher
 g_pub_myo   = None
 
-def send_rec (lst):
-    sent = 'MYO ' + lst[0] + ' ' + lst[1] + ' ' + lst[2]
+def send_str (s):
     sock = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto (sent, (g_rec_host, int(g_rec_port)))
+    sock.sendto (s, (g_rec_host, int(g_rec_port)))
+
+def send_rec (lst):
+    if g_is_rec:
+        sent = 'MYO ' + lst[0] + ' ' + lst[1] + ' ' + lst[2]
+        send_str (sent)
 
 # using ros function
 def send_ros (pub, lst):
@@ -48,10 +54,13 @@ def parse_input (data, pub):
         # check 'Go' tag
         tag = g_tok_q.popleft ()
     
-        if tag == 'START':
-            continue
+        if tag == 'START' or tag == 'END':
+            if tag == 'START':
+                g_is_rec = True
+            else:
+                g_is_rec = False
 
-        if tag == 'END':
+            send_str (tag)
             continue
 
         if tag != 'GO':
@@ -94,7 +103,7 @@ def myo_server_thread ():
         server.bind ((g_host, g_myo_port))
         server.listen (10)
     except:
-        print 'failed to start Mr.Geppetto'
+        print 'failed to start Mr.Geppetto (myo)'
         sys.exit ()
     
     # starting the server loop
@@ -109,14 +118,16 @@ def myo_server_thread ():
             server.close ()
             return
 
-# main function
-if __name__ == "__main__":
-   
+def main ():
     g_host, g_myo_port = util.read_conf ('myo') 
     g_rec_host, g_rec_port = util.read_conf ('recorder')    
 
-    print 'Initialize ROS nodes - myo'
+    if g_host == None:
+        print 'MYO is not configured. Exit'
+        return
+
     if not g_testing_mode:
+        print 'Initialize ROS nodes - myo'
         g_pub_myo = rospy.Publisher ('myo',   String, queue_size=10)
         rospy.init_node ('myo', anonymous=True)
         rate = rospy.Rate (10) # 10hz
@@ -124,3 +135,7 @@ if __name__ == "__main__":
     # starting the server
     print 'Starting Mr.Geppetto (myo) server @ {}:{}'.format(g_host, g_myo_port)
     myo_server_thread ()
+
+# main function
+if __name__ == "__main__":
+    main ();

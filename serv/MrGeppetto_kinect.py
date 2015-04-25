@@ -1,3 +1,5 @@
+g_testing_mod = True
+
 import os
 import sys
 import socket
@@ -5,14 +7,15 @@ import thread
 import util
 from collections import deque
 
-# ros imports
-import rospy
-from std_msgs.msg import String
+if not g_testing_mod:
+    # ros imports
+    import rospy
+    from std_msgs.msg import String
 
 # global variabls
 g_tok_q = deque ()
-g_host  = socket.gethostbyname (socket.gethostname ())
-g_kinect_port   = 4002
+g_host = None
+g_kinect_port = None
 
 # global variables for ROS publisher
 g_pub_kinect    = None
@@ -26,7 +29,14 @@ def send_ros (pub, list):
     sent = sent + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
     
     print 'sendin {}'.format (sent)
-    pub.publish (sent);
+
+    if not g_testing_mod:
+        try:
+            pub.publish (sent);
+        except rospy.ROSInterruptException:
+            print 'ros interrupt exception'
+            pass
+
 
 def parse_input (data, pub):
 
@@ -68,18 +78,14 @@ def parse_input (data, pub):
 
 def handler (pub, conn, addr):
     
-    try:
-        print 'handler started'
+    print 'handler started'
         
-        # Keep the client here
-        while True:
-            # get the new (raw) data
-            new_data = conn.recv (1024)
-            parse_input (new_data, pub)
+    # Keep the client here
+    while True:
+        # get the new (raw) data
+        new_data = conn.recv (1024)
+        parse_input (new_data, pub)
             
-    except rospy.ROSInterruptException:
-        print 'ros interrupt exception'
-        pass
             
 def kinect_server_thread ():
     
@@ -105,19 +111,24 @@ def kinect_server_thread ():
             server.close ()
             return
 
-# main function
-if __name__ == "__main__":
-    
+def main ():
     g_host, g_kinect_port = util.read_conf ('kinect')
-        
+    
+    if g_host == None:
+        print 'Kinect is not configured. Exit'
+        return
+
     # init ros nodes
-    print 'Initialize ROS nodes - kinect'
-    g_pub_kinect = rospy.Publisher ('kinect', String, queue_size=10)
-    rospy.init_node ('kinect', anonymous=True)
-    rate = rospy.Rate (10) # 10hz
+    if not g_testing_mod:
+        print 'Initialize ROS nodes - kinect'
+        g_pub_kinect = rospy.Publisher ('kinect', String, queue_size=10)
+        rospy.init_node ('kinect', anonymous=True)
+        rate = rospy.Rate (10) # 10hz
     
     # starting the server
     print 'Starting Mr.Geppetto server @ {}:{}'.format(g_host, g_kinect_port)
     kinect_server_thread ()
     
-    
+# main function
+if __name__ == "__main__":
+    main ()
