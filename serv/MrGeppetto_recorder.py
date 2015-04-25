@@ -10,8 +10,9 @@ from collections import deque
 import util
 
 # global variabls
-g_host  = 'localhost'
-g_port  = 4008
+g_conf  = None
+g_host  = None
+g_port  = None
 g_isRec = False
 g_fname = None
 g_fh    = None
@@ -60,12 +61,18 @@ def recorder_server_thread ():
         print data.strip(), addr
         data_handler (data.strip ())
 
-# main function
-if __name__ == "__main__":
-    
-    dic = util.read_all_conf ()
-    print dic
+def main ():
+    g_conf = util.read_all_conf ()
+    g_host, g_port = util.read_conf ('recorder')
+
+    if g_host == None:
+        print 'Recorder is not configured. Exis'
+        return
 
     # starting the server
     print 'Starting Mr.Geppetto recorder @ {}:{}'.format(g_host, g_port)
     recorder_server_thread ()
+
+# main function
+if __name__ == "__main__":
+    main ()
