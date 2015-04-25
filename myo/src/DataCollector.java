@@ -118,6 +118,7 @@ public class DataCollector extends AbstractDeviceListener {
 	    whichArm = null;
     }
 
+/*
     @Override
     public String toString () {
 	    StringBuilder builder = new StringBuilder("\r");
@@ -148,6 +149,7 @@ public class DataCollector extends AbstractDeviceListener {
 	    builder.append(poseString);
 	    return builder.toString();
     }
+*/
 
     String printAngle (double angle) {
         return String.format (
@@ -168,15 +170,15 @@ public class DataCollector extends AbstractDeviceListener {
         return System.currentTimeMillis () - m_beginRecTime;
     }
 
-    public String getRoll () {
-        return Integer.toString ((int)rollW);
+    public int getRoll () {
+        return (int)rollW;
     }
 
     public String getPose () {
         if (currentPose.getType () == PoseType.FIST) {
-            return new String ("open");
-        } else {
             return new String ("close");
+        } else {
+            return new String ("open");
         }
     }
 

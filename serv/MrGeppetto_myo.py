@@ -27,7 +27,7 @@ g_pub_myo   = None
 
 def send_rec (lst):
     sent = 'MYO ' + lst[0] + ' ' + lst[1] + ' ' + lst[2]
-    sock = socket.socket (socket.AF_INET, socket.SOCK_DGRAM) # UDP
+    sock = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto (sent, (g_rec_host, int(g_rec_port)))
 
 # using ros function
@@ -47,7 +47,13 @@ def parse_input (data, pub):
 
         # check 'Go' tag
         tag = g_tok_q.popleft ()
-         
+    
+        if tag == 'START':
+            continue
+
+        if tag == 'END':
+            continue
+
         if tag != 'GO':
             print '{}'.format (tag)
             g_trans.append (tag)

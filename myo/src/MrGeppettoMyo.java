@@ -73,7 +73,7 @@ public class MrGeppettoMyo {
 
         if (args.length != 2) {
             err ("Incorrect input format");
-            log ("[Usage] java MrGeppetto [host] [port]");
+            log ("[Usage] java MrGeppetto [host] [port] [rec_host] [rec_port]");
             return;
         }
 
@@ -108,6 +108,10 @@ public class MrGeppettoMyo {
                 return;
             }
 
+            boolean isRec = false;
+            String curPose = null;
+            int curRoll = -256;
+
 			while (true) {
                 /* report per 0.5 seconds */
 				hub.run (M_MONITOR_INTR);
@@ -116,19 +120,38 @@ public class MrGeppettoMyo {
                 if (dc.isConnected ()) {
 
                     String newPose = dc.getPose ();
-                    String out = "GO " + newPose + " " + dc.getRoll ();
+                    int newRoll = dc.getRoll ();
+
+                    String out = "GO " + newPose + " " + newRoll;
+
+                    /* skip if no change */
+                    if (newPose.equals (curPose) && newRoll == curRoll)
+                        continue;
+                    else {
+                        curPose = newPose;
+                        curRoll = newRoll;
+                    }
 
                     if (mg.send (out)) {
-                        log ("[Status] " + dc.toString ());
+                        log ("[Status] " + out);
                     } else {
                         err ("Network failure - Mr.Geppetto feels sorry.");
                         break;
                     }
-
+                    
                     /* do recording */
                     if (dc.isRecording ()) {
-                        long offset = dc.getRecTimeOffset ();
-                        //MrGeppettoMyo.log ("[Rec] " + out + "@" + offset);
+                        
+                        if (isRec == false) {
+                            /* send start */
+                            mg.send ("START");
+                            isRec = true;
+                        }
+                    } else {
+                        if (isRec == true) {
+                            mg.send ("END");
+                            isRec = false;
+                        }
                     }
 			    }
             }
