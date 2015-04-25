@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 g_testing_mod = True
 
 import os
@@ -22,7 +24,9 @@ g_pub_kinect    = None
 
 # using ros function
 def send_ros (pub, list):
-    
+
+    global g_testing_mod
+
     sent =        list[0]  + ' ' + list[1]  + ' ' + list[2]  + ' ' + list[3]  + ' '
     sent = sent + list[4]  + ' ' + list[5]  + ' ' + list[6]  + ' '
     sent = sent + list[7]  + ' ' + list[8]  + ' ' + list[9]  + ' ' + list[10] + ' ' 
@@ -39,6 +43,8 @@ def send_ros (pub, list):
 
 
 def parse_input (data, pub):
+
+    global g_tok_q
 
     # add the new input to the token queue
     g_tok_q.extend (data.strip().split (' '));
@@ -88,7 +94,8 @@ def handler (pub, conn, addr):
             
             
 def kinect_server_thread ():
-    
+    global g_kinect_port
+
     server = None
 
     try:
@@ -112,6 +119,12 @@ def kinect_server_thread ():
             return
 
 def main ():
+    
+    global g_host
+    global g_kinect_port
+    global g_testing_mod
+    global g_pub_kinect   
+
     g_host, g_kinect_port = util.read_conf ('kinect')
     
     if g_host == None:

@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# Compile option 
 g_testing_mode = True
 
+# imports
 import os
 import sys
 import socket
@@ -45,6 +45,9 @@ def send_ros (pub, lst):
         pub.publish (sent)
 
 def parse_input (data, pub):
+
+    global g_tok_q
+    global g_trans
 
     # add the new input to the token queue
     g_tok_q.extend (data.strip().split (' '));
@@ -95,15 +98,21 @@ def handler (pub, conn, addr):
         pass
             
 def myo_server_thread ():
+   
+    global g_host
+    global g_myo_port
+    global g_pub_myo
     
     server = None
 
     try:
+        print '{}@{}'.format (g_myo_port, g_host)
         server = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
         server.bind ((g_host, g_myo_port))
         server.listen (10)
-    except:
+    except Exception, e:
         print 'failed to start Mr.Geppetto (myo)'
+        print str(e)
         sys.exit ()
     
     # starting the server loop
@@ -119,6 +128,13 @@ def myo_server_thread ():
             return
 
 def main ():
+
+    global g_host
+    global g_myo_port
+    global g_rec_host
+    global g_rec_port
+    global g_pub_myo
+
     g_host, g_myo_port = util.read_conf ('myo') 
     g_rec_host, g_rec_port = util.read_conf ('recorder')    
 
@@ -128,7 +144,7 @@ def main ():
 
     if not g_testing_mode:
         print 'Initialize ROS nodes - myo'
-        g_pub_myo = rospy.Publisher ('myo',   String, queue_size=10)
+        g_pub_myo = rospy.Publisher ('myo', String, queue_size=10)
         rospy.init_node ('myo', anonymous=True)
         rate = rospy.Rate (10) # 10hz
     
@@ -138,4 +154,5 @@ def main ():
 
 # main function
 if __name__ == "__main__":
-    main ();
+    main ()
+    

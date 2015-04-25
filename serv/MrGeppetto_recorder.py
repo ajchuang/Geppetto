@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # common import
 import os
 import os.path
@@ -45,6 +47,8 @@ def data_handler (data):
 
 def recorder_server_thread ():
 
+    global g_host
+    global g_port
     server = None
 
     try:
@@ -62,6 +66,9 @@ def recorder_server_thread ():
         data_handler (data.strip ())
 
 def main ():
+    global g_host
+    global g_port
+
     g_conf = util.read_all_conf ()
     g_host, g_port = util.read_conf ('recorder')
 
