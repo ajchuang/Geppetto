@@ -1,4 +1,4 @@
-import socket, sys, threading, time, os, signal, util
+import socket, sys, threading, time, os, signal
 
 #ros imports
 import rospy
