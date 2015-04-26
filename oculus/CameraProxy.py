@@ -36,6 +36,7 @@ def callback(data):
 	global count
 	rospy.loginfo(rospy.get_caller_id() + "height %s", data.height)
 	rospy.loginfo(rospy.get_caller_id() + "width %s", data.width)
+	rospy.loginfo(rospy.get_caller_id() + "encoding %s", data.encoding)
 	# cameraData = data.data
 	if (count == 0):
 		clientSocket.send(data.data)
@@ -53,11 +54,11 @@ def socketInit(ip, port):
 	return clientSocket
 
 if __name__ == "__main__":
-#	try:
+	try:
 		clientSocket = socketInit(ip, port)
 		# sendThread = SendThread(clientSocket)
 		# sendThread.start()
-#	except:
-#		print "[*] Server not found. Running local mode."
+	except:
+		print "[*] Server not found. Running local mode."
 
 		cameraListener()
