@@ -1,14 +1,14 @@
 #!/usr/bin/python
 import sys
 
-g_testing_mode = None
+g_testing_mode = 'False'
 
 if (len (sys.argv) == 2):
     g_testing_mode = sys.argv[1]
 else:
-    g_testing_mode = False
+    g_testing_mode = 'False'
     
-print 'set testing mode: {}'.format (g_testing_mode)
+print '[KINECT] set testing mode: ' + g_testing_mode
     
 import os
 
@@ -17,7 +17,7 @@ import thread
 import util
 from collections import deque
 
-if not g_testing_mode:
+if g_testing_mode == 'False':
     # ros imports
     import rospy
     from std_msgs.msg import String
@@ -47,7 +47,7 @@ def send_ros (pub, list):
     sent = sent + list[7]  + ' ' + list[8]  + ' ' + list[9]  + ' ' + list[10] + ' ' 
     sent = sent + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
     
-    if not g_testing_mode:
+    if g_testing_mode == 'False':
         try:
             pub.publish (sent);
         except rospy.ROSInterruptException:
@@ -142,7 +142,7 @@ def main ():
         return
 
     # init ros nodes
-    if not g_testing_mode:
+    if g_testing_mode == 'False':
         print 'Initialize ROS nodes - kinect'
         g_pub_kinect = rospy.Publisher ('kinect', String, queue_size=10)
         rospy.init_node ('kinect', anonymous=True)

@@ -1,15 +1,14 @@
 #!/usr/bin/python
 import sys
 
-g_testing_mode = False
+g_testing_mode = 'False'
 
 if (len (sys.argv) == 2):
-    print '[SYS] set test mode to {}'.format (bool(sys.argv[1]))
-    g_testing_mode = bool(sys.argv[1])
+    g_testing_mode = sys.argv[1]
 else:
-    g_testing_mode = False
+    g_testing_mode = 'False'
     
-print 'set testing mode: {}'.format (g_testing_mode)
+print '[SYS] set testing mode: ' + g_testing_mode
 
 # imports
 import os
@@ -18,7 +17,7 @@ import thread
 import util
 from collections import deque
 
-if not g_testing_mode:
+if g_testing_mode == 'False':
     # ros imports
     import rospy
     from std_msgs.msg import String
@@ -48,7 +47,7 @@ def send_rec (lst):
 # using ros function
 def send_ros (pub, lst):
 
-    if not g_testing_mode:
+    if g_testing_mode == 'False':
         sent = lst[0] + ' ' + lst[1]
         print 'sendin {}'.format (sent)
         
@@ -154,7 +153,7 @@ def main ():
         print 'MYO is not configured. Exit'
         return
 
-    if not g_testing_mode:
+    if g_testing_mode == 'False':
         print 'Initialize ROS nodes - myo'
         g_pub_myo = rospy.Publisher ('myo', String, queue_size=10)
         rospy.init_node ('myo', anonymous=True)
