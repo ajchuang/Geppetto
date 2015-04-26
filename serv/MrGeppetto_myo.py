@@ -1,10 +1,11 @@
 #!/usr/bin/python
 import sys
 
-g_testing_mode = None
+g_testing_mode = False
 
 if (len (sys.argv) == 2):
-    g_testing_mode = sys.argv[1]
+    print '[SYS] set test mode to {}'.format (bool(sys.argv[1]))
+    g_testing_mode = bool(sys.argv[1])
 else:
     g_testing_mode = False
     
@@ -100,10 +101,14 @@ def handler (pub, conn, addr):
     
     # Keep the client here
     while True:
-        # get the new (raw) data
-        new_data = conn.recv (1024)
-        parse_input (new_data.strip(), pub)
-            
+        try:
+            # get the new (raw) data
+            new_data = conn.recv (1024)
+            parse_input (new_data.strip(), pub)
+        except:
+            print 'disconnected - abort'
+            return
+
 def myo_server_thread ():
    
     global g_host
