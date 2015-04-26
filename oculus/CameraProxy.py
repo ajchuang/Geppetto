@@ -40,6 +40,9 @@ def callback(data):
 	# cameraData = data.data
 	if (count == 0):
 		clientSocket.send(data.data)
+		fd = open("dump", w)
+		fd.write(data.data)
+		sys.exit(0)
 		count += 1
 
 
