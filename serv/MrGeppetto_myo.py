@@ -1,9 +1,17 @@
 #!/usr/bin/python
-g_testing_mode = True
+import sys
+
+g_testing_mode = None
+
+if (len (sys.argv) == 2):
+    g_testing_mode = sys.argv[1]
+else:
+    g_testing_mode = False
+    
+print 'set testing mode: {}'.format (g_testing_mode)
 
 # imports
 import os
-import sys
 import socket
 import thread
 import util

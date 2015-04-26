@@ -1,15 +1,23 @@
 #!/usr/bin/python
-
-g_testing_mod = True
-
-import os
 import sys
+
+g_testing_mode = None
+
+if (len (sys.argv) == 2):
+    g_testing_mode = sys.argv[1]
+else:
+    g_testing_mode = False
+    
+print 'set testing mode: {}'.format (g_testing_mode)
+    
+import os
+
 import socket
 import thread
 import util
 from collections import deque
 
-if not g_testing_mod:
+if not g_testing_mode:
     # ros imports
     import rospy
     from std_msgs.msg import String
@@ -32,14 +40,14 @@ g_sample_cnt    = 0
 # using ros function
 def send_ros (pub, list):
 
-    global g_testing_mod
+    global g_testing_mode
 
     sent =        list[0]  + ' ' + list[1]  + ' ' + list[2]  + ' ' + list[3]  + ' '
     sent = sent + list[4]  + ' ' + list[5]  + ' ' + list[6]  + ' '
     sent = sent + list[7]  + ' ' + list[8]  + ' ' + list[9]  + ' ' + list[10] + ' ' 
     sent = sent + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
     
-    if not g_testing_mod:
+    if not g_testing_mode:
         try:
             pub.publish (sent);
         except rospy.ROSInterruptException:
@@ -94,7 +102,6 @@ def handler (pub, conn, addr):
         new_data = conn.recv (1024)
         parse_input (new_data, pub)
             
-            
 def kinect_server_thread ():
     global g_kinect_port
 
@@ -124,7 +131,7 @@ def main ():
     
     global g_host
     global g_kinect_port
-    global g_testing_mod
+    global g_testing_mode
     global g_pub_kinect   
     global g_sample_rate
 
@@ -136,7 +143,7 @@ def main ():
         return
 
     # init ros nodes
-    if not g_testing_mod:
+    if not g_testing_mode:
         print 'Initialize ROS nodes - kinect'
         g_pub_kinect = rospy.Publisher ('kinect', String, queue_size=10)
         rospy.init_node ('kinect', anonymous=True)
