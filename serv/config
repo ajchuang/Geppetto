@@ -1,4 +1,4 @@
 #   server_name,    host_address,   host_port,  sample_rate
     recorder        160.39.192.77   4000        -1
-#   kinect          localhost       4001        400
-    myo             160.39.192.77   4002        -1
+    kinect          localhost       4001        400
+    myo             160.39.192.77   4003        -1
