@@ -9,24 +9,28 @@ global cameraData
 global ip
 global port
 
-cameraData = None
-ip = sys.argv[2]
-port = sys.argv[3]
+cameraData = "init"
+ip = sys.argv[1]
+port = int(sys.argv[2])
 
 
 class SendThread(threading.Thread):
 
 	def __init__(self, socket):
+		threading.Thread.__init__(self)
 		self.socket = socket
 
 	def run(self):
 		print "[*] Server found! Sending data..."
 		while True:
-			socket.send(data)
+		#	print str(cameraData)
+			self.socket.send(cameraData)
 
 
 def callback(data):
-	rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.height)
+	global cameraData
+	rospy.loginfo(rospy.get_caller_id() + "height %s", data.height)
+	rospy.loginfo(rospy.get_caller_id() + "width %s", data.width)
 	cameraData = data.data
 
 def cameraListener():
@@ -40,11 +44,11 @@ def socketInit(ip, port):
 	return clientSocket
 
 if __name__ == "__main__":
-	try:
+#	try:
 		clientSocket = socketInit(ip, port)
 		sendThread = SendThread(clientSocket)
 		sendThread.start()
-	except:
-		print "[*] Server not found. Running local mode."
+#	except:
+#		print "[*] Server not found. Running local mode."
 
-	cameraListener()
+		cameraListener()
