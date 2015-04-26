@@ -5,14 +5,17 @@ import rospy
 from std_msgs.msg import String, Bool
 from sensor_msgs.msg import Image
 
+global clientSocket
 global cameraData
 global ip
 global port
+global count
 
+count = 0
 cameraData = "init"
 ip = sys.argv[1]
 port = int(sys.argv[2])
-
+clientSocket = socket.socket()
 
 class SendThread(threading.Thread):
 
@@ -29,9 +32,15 @@ class SendThread(threading.Thread):
 
 def callback(data):
 	global cameraData
+	global clientSocket
+	global count
 	rospy.loginfo(rospy.get_caller_id() + "height %s", data.height)
 	rospy.loginfo(rospy.get_caller_id() + "width %s", data.width)
-	cameraData = data.data
+	# cameraData = data.data
+	if (count == 0):
+		clientSocket.send(data.data)
+		count += 1
+
 
 def cameraListener():
 	rospy.init_node('CameraProxy', anonymous=True)
@@ -46,8 +55,8 @@ def socketInit(ip, port):
 if __name__ == "__main__":
 #	try:
 		clientSocket = socketInit(ip, port)
-		sendThread = SendThread(clientSocket)
-		sendThread.start()
+		# sendThread = SendThread(clientSocket)
+		# sendThread.start()
 #	except:
 #		print "[*] Server not found. Running local mode."
 
