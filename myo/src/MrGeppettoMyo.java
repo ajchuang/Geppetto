@@ -16,20 +16,47 @@ public class MrGeppettoMyo {
     Socket m_socket;
     PrintWriter m_outStream;
 
-    public MrGeppettoMyo (String host, int port) {
+    int m_rPort;
+    String m_rHost;
+    Socket m_rSocket;
+    PrintWriter m_rStream;
+
+    public MrGeppettoMyo (String host, int port, String rhost, int rport) {
         
         m_host = host;
         m_port = port;
-        
         m_socket = null;
         m_outStream = null;
+
+        m_rPort = rport;
+        m_rHost = rhost;
+        m_rSocket = null;
+        m_rStream = null;
     }
 
-    public boolean connect (String host, int port) {
+    public boolean connect () {
 
         try {
-            m_socket = new Socket (host, port);
+            m_socket = new Socket (m_host, m_port);
             m_outStream = new PrintWriter (m_socket.getOutputStream ()); 
+            
+            m_rSocket = new Socket (m_rHost, m_rPort);
+            m_rStream = new PrintWriter (m_rSocket.getOutputStream ()); 
+            
+            return true;
+        } catch (Exception e) {
+            MrGeppettoMyo.err (e.toString ());
+            e.printStackTrace ();
+        }
+
+        return false;
+    }
+
+    public boolean sendRoll (String roll) {
+    
+        try {
+            m_rStream.print (roll);
+            m_rStream.flush ();
             return true;
         } catch (Exception e) {
             MrGeppettoMyo.err (e.toString ());
@@ -71,14 +98,16 @@ public class MrGeppettoMyo {
 
     public static void main (String[] args) {
 
-        if (args.length != 2) {
+        if (args.length != 4) {
             err ("Incorrect input format");
-            log ("[Usage] java MrGeppetto [host] [port] [rec_host] [rec_port]");
+            log ("[Usage] java MrGeppetto [host] [port] [kinect_host] [kinect_port]");
             return;
         }
 
         String host = args[0];
         int port = Integer.parseInt (args[1]);
+        String rhost = args[2];
+        int rport = Integer.parseInt (args[3]);
 
         try {
             /* init the myo hub */
@@ -101,9 +130,9 @@ public class MrGeppettoMyo {
 			hub.addListener ((DeviceListener)dc);
 
             /* establish the connection */
-            MrGeppettoMyo mg = new MrGeppettoMyo (host, port);
+            MrGeppettoMyo mg = new MrGeppettoMyo (host, port, rhost, rport);
             
-            if (mg.connect (host, port) == false) {
+            if (mg.connect () == false) {
                 err ("Failed to connect to the host");
                 return;
             }
@@ -140,7 +169,8 @@ public class MrGeppettoMyo {
                 String newPose = dc.getPose ();
                 int newRoll = dc.getRoll ();
 
-                String out = "GO " + newPose + " " + newRoll / 180.0 * Math.PI;
+                String out = "GO " + newPose + " " + (newRoll / 180.0 * Math.PI);
+                String rol = "RL " + (newRoll / 180.0 * Math.PI);
 
                 /* skip if no change */
                 if (newPose.equals (curPose) && newRoll == curRoll)
@@ -150,7 +180,7 @@ public class MrGeppettoMyo {
                     curRoll = newRoll;
                 }
 
-                if (mg.send (out)) {
+                if (mg.send (out) && mg.sendRoll (rol)) {
                     log ("[Status] " + out);
                 } else {
                     err ("Network failure - Mr.Geppetto feels sorry.");

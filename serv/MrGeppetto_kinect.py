@@ -29,8 +29,11 @@ g_trans = list ()
 
 g_host          = None
 g_kinect_port   = None
+
 g_rec_host      = None
 g_rec_port      = None
+
+g_roll_ang      = 0.0
 
 # global variables for ROS publisher
 g_pub_kinect    = None
@@ -43,7 +46,7 @@ def send_ros (pub, list):
     global g_testing_mode
 
     sent =        list[0]  + ' ' + list[1]  + ' ' + list[2]  + ' ' + list[3]  + ' '
-    sent = sent + list[4]  + ' ' + list[5]  + ' ' + list[6]  + ' '
+    sent = sent + str(g_roll_ang) + ' ' + list[5]  + ' ' + list[6]  + ' '
     sent = sent + list[7]  + ' ' + list[8]  + ' ' + list[9]  + ' ' + list[10] + ' ' 
     sent = sent + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
     
@@ -56,7 +59,7 @@ def send_ros (pub, list):
 
 def send_rec (list):
     sent ='KNT '+ list[0]  + ' ' + list[1]  + ' ' + list[2]  + ' ' + list[3]  + ' '
-    sent = sent + list[4]  + ' ' + list[5]  + ' ' + list[6]  + ' '
+    sent = sent + str(g_roll_ang) + ' ' + list[5]  + ' ' + list[6]  + ' '
     sent = sent + list[7]  + ' ' + list[8]  + ' ' + list[9]  + ' ' + list[10] + ' ' 
     sent = sent + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
     
@@ -69,7 +72,8 @@ def parse_input (data, pub):
     global g_tok_q
     global g_trans
     global g_data
-    
+    global g_roll_ang
+
     # add the new input to the token queue
     g_data += data
     g_tok_q.extend (g_data.split (' '));
@@ -78,7 +82,11 @@ def parse_input (data, pub):
 
         # check 'Go' tag
         tag = g_tok_q.popleft ()
-         
+
+        # for other thread 
+        if tag == 'RL' and len(g_tok_q) > 1:
+            g_roll_ang = g_tok_q.popleft ();
+
         if tag != 'GO':
             g_trans.append (tag)
             
@@ -133,6 +141,8 @@ def main ():
     global g_testing_mode
     global g_pub_kinect   
     global g_sample_rate
+    global g_roll_host
+    global g_roll_port
 
     g_host, g_kinect_port, g_sample_rate = util.read_conf ('kinect')
     g_rec_host, g_rec_port, unused = util.read_conf ('recorder')
