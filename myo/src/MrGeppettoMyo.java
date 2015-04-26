@@ -14,7 +14,7 @@ public class MrGeppettoMyo {
     int m_port;
     String m_host;
     Socket m_socket;
-    DataOutputStream m_outStream;
+    PrintWriter m_outStream;
 
     public MrGeppettoMyo (String host, int port) {
         
@@ -29,7 +29,7 @@ public class MrGeppettoMyo {
 
         try {
             m_socket = new Socket (host, port);
-            m_outStream = new DataOutputStream (m_socket.getOutputStream ()); 
+            m_outStream = new PrintWriter (m_socket.getOutputStream ()); 
             return true;
         } catch (Exception e) {
             MrGeppettoMyo.err (e.toString ());
@@ -44,7 +44,7 @@ public class MrGeppettoMyo {
         try {
 
             /* send over TCP */
-            m_outStream.writeChars (info);
+            m_outStream.print (info);
             m_outStream.flush ();
             return true;
 
@@ -117,43 +117,45 @@ public class MrGeppettoMyo {
 				hub.run (M_MONITOR_INTR);
                 
                 /* send data only when connected */
-                if (dc.isConnected ()) {
+                if (!dc.isConnected ())
+                    continue;
 
-                    String newPose = dc.getPose ();
-                    int newRoll = dc.getRoll ();
-
-                    String out = "GO " + newPose + " " + newRoll;
-
-                    /* skip if no change */
-                    if (newPose.equals (curPose) && newRoll == curRoll)
-                        continue;
-                    else {
-                        curPose = newPose;
-                        curRoll = newRoll;
+                /* do recording */
+                if (dc.isRecording ()) {
+                    if (isRec == false) {
+                        /* send start */
+                        System.out.println ("[MYO] start rec");
+                        mg.send ("START");
+                        isRec = true;
                     }
-
-                    if (mg.send (out)) {
-                        log ("[Status] " + out);
-                    } else {
-                        err ("Network failure - Mr.Geppetto feels sorry.");
-                        break;
-                    }
-                    
-                    /* do recording */
-                    if (dc.isRecording ()) {
-                        
-                        if (isRec == false) {
-                            /* send start */
-                            mg.send ("START");
-                            isRec = true;
-                        }
-                    } else {
-                        if (isRec == true) {
-                            mg.send ("END");
-                            isRec = false;
-                        }
+                } else {
+                    if (isRec == true) {
+                        System.out.println ("[MYO] stop rec");
+                        mg.send ("END");
+                        isRec = false;
                     }
 			    }
+
+                /* send data */
+                String newPose = dc.getPose ();
+                int newRoll = dc.getRoll ();
+
+                String out = "GO " + newPose + " " + newRoll;
+
+                /* skip if no change */
+                if (newPose.equals (curPose) && newRoll == curRoll)
+                    continue;
+                else {
+                    curPose = newPose;
+                    curRoll = newRoll;
+                }
+
+                if (mg.send (out)) {
+                    log ("[Status] " + out);
+                } else {
+                    err ("Network failure - Mr.Geppetto feels sorry.");
+                    break;
+                } 
             }
 
             err ("Bad thing happens");
