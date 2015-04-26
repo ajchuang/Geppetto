@@ -25,7 +25,7 @@ if not g_testing_mode:
 # global variabls
 g_data  = ''
 g_tok_q = deque ()
-g_trans = None
+g_trans = list ()
 
 g_host          = None
 g_kinect_port   = None
@@ -55,27 +55,26 @@ def send_ros (pub, list):
             pass
 
 def send_rec (list):
-    sent =        list[0]  + ' ' + list[1]  + ' ' + list[2]  + ' ' + list[3]  + ' '
+    sent ='KNT '+ list[0]  + ' ' + list[1]  + ' ' + list[2]  + ' ' + list[3]  + ' '
     sent = sent + list[4]  + ' ' + list[5]  + ' ' + list[6]  + ' '
     sent = sent + list[7]  + ' ' + list[8]  + ' ' + list[9]  + ' ' + list[10] + ' ' 
     sent = sent + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
     
     # send to the recorder
     sock = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto (sent, (g_rec_host, g_rec_port))
+    sock.sendto (sent, (g_rec_host, int(g_rec_port)))
 
 def parse_input (data, pub):
 
     global g_tok_q
     global g_trans
+    global g_data
     
     # add the new input to the token queue
     g_data += data
     g_tok_q.extend (g_data.split (' '));
     
     while len(g_tok_q) > 0:
-
-        print 'test 0'
 
         # check 'Go' tag
         tag = g_tok_q.popleft ()
@@ -100,7 +99,7 @@ def handler (pub, conn, addr):
     while True:
         # get the new (raw) data
         new_data = conn.recv (1024)
-        parse_input (new_data, pub)
+        parse_input (new_data.strip (), pub)
             
 def kinect_server_thread ():
     global g_kinect_port
