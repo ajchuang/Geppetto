@@ -1,0 +1,8 @@
+prefix=/home/sww002/humanoid_project/devel
+
+Name: torso_controller
+Description: Description of torso_controller
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/sww002/humanoid_project/devel/lib 
+Requires: 

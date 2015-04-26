@@ -23,7 +23,7 @@ class OculusThread(threading.Thread):
         print "[*] " + "Connection from : "+ self.ip +":" + str(self.port)
         while True:
             msg = self.socket.recv(2048)
-            sendROS(pub, msg)
+            sendROS(self.pub, msg)
             print msg
 
 
@@ -32,7 +32,7 @@ def sendROS(pub, sendStr):
     if sendList[0] == "s":
         sendList = sendList[4:7]
         newStr = '  '.join(sendList)
-        pub.publish(sendStr)
+        pub.publish(newStr)
     return
     
 
@@ -60,12 +60,13 @@ def main():
     port = 10000
     SERVER_SOCKET.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  
     # host = "127.0.0.1"
-    host = socket.gethostbyname(socket.gethostname())
+    # host = socket.gethostbyname(socket.gethostname())
+    host = "192.168.1.139"
     SERVER_SOCKET.bind((host, port))
     SERVER_SOCKET.listen(4)
     while True:
         (oculusServerSocket, (ip, port)) = SERVER_SOCKET.accept()
-        oculusThread = OculusThread(ip,port,oculusServerSocket)
+        oculusThread = OculusThread(ip,port,oculusServerSocket,pub)
         oculusThread.start()
 
 if  __name__ == "__main__":

@@ -1,0 +1,7 @@
+set(_CATKIN_CURRENT_PACKAGE "torso_controller")
+set(torso_controller_MAINTAINER "sww002 <sww002@todo.todo>")
+set(torso_controller_DEPRECATED "")
+set(torso_controller_VERSION "0.0.0")
+set(torso_controller_BUILD_DEPENDS "actionlib" "pr2_controllers_msgs" "roscpp")
+set(torso_controller_RUN_DEPENDS "actionlib" "pr2_controllers_msgs" "roscpp")
+set(torso_controller_BUILDTOOL_DEPENDS "catkin")

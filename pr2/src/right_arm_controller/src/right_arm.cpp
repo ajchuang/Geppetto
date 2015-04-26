@@ -1,0 +1,161 @@
+#include <ros/ros.h>
+#include <pr2_controllers_msgs/JointTrajectoryAction.h>
+#include <actionlib/client/simple_action_client.h>
+#include <std_msgs/String.h>
+#include <string>
+#include <iostream>
+#include <cstdlib>
+#include <sensor_msgs/JointState.h>
+
+using namespace std;
+typedef actionlib::SimpleActionClient< pr2_controllers_msgs::JointTrajectoryAction > TrajClient;
+
+/* Prototypes */
+void xx_callback (const std_msgs::String::ConstPtr& msg);
+void chatterCallback (const sensor_msgs::JointState & joint);
+
+/* Global Variable */
+TrajClient* traj_client_;
+ros::NodeHandle *n;
+ros::Subscriber sub, sub1;
+double current_joint[7];
+
+// Init ROS
+void init (int argc, char** argv) {
+    ros::init (argc, argv, "right_listener");   
+    traj_client_ = new TrajClient ("r_arm_controller/joint_trajectory_action", true);
+    n = new ros::NodeHandle ();    
+    sub1 = n->subscribe ("joint_states", 1000, chatterCallback);
+    sub  = n->subscribe ("kinect", 1000, xx_callback);
+}
+
+void deinit () {
+    delete traj_client_;
+    delete n;
+}
+
+void chatterCallback (const sensor_msgs::JointState & joint){
+    int i;
+    int joints[7] = {18,19,17,21,20,22,23};
+    for (i=0; i<7; i++){
+        current_joint[i] = joint.position[joints[i]];
+    }
+}
+
+//! Sends the command to start a given trajectory
+void startTrajectory (pr2_controllers_msgs::JointTrajectoryGoal goal){
+    // When to start the trajectory: 1s from now
+    goal.trajectory.header.stamp = ros::Time::now() + ros::Duration(0.3);
+    traj_client_->sendGoal (goal);
+}
+
+pr2_controllers_msgs::JointTrajectoryGoal armExtensionTrajectory (double* data){    
+    //our goal variable
+    pr2_controllers_msgs::JointTrajectoryGoal goal;
+
+    // First, the joint names, which apply to all waypoints
+    goal.trajectory.joint_names.push_back("r_shoulder_pan_joint");
+    goal.trajectory.joint_names.push_back("r_shoulder_lift_joint");
+    goal.trajectory.joint_names.push_back("r_upper_arm_roll_joint");
+    goal.trajectory.joint_names.push_back("r_elbow_flex_joint");
+    goal.trajectory.joint_names.push_back("r_forearm_roll_joint");
+    goal.trajectory.joint_names.push_back("r_wrist_flex_joint");
+    goal.trajectory.joint_names.push_back("r_wrist_roll_joint");
+
+    // We will have two waypoints in this goal trajectory
+    goal.trajectory.points.resize(2);
+
+    // First trajectory point
+    // Positions
+    int ind = 0;
+    goal.trajectory.points[ind].positions.resize(7);
+    goal.trajectory.points[ind].positions[0] = current_joint[0];
+    goal.trajectory.points[ind].positions[1] = current_joint[1];
+    goal.trajectory.points[ind].positions[2] = current_joint[2];
+    goal.trajectory.points[ind].positions[3] = current_joint[3];
+    goal.trajectory.points[ind].positions[4] = current_joint[4];
+    goal.trajectory.points[ind].positions[5] = current_joint[5];
+    goal.trajectory.points[ind].positions[6] = current_joint[6];
+    
+    // Velocities
+    goal.trajectory.points[ind].velocities.resize(7);
+    
+    for (size_t j = 0; j < 7; ++j) {
+        goal.trajectory.points[ind].velocities[j] = 0.0;
+    }
+    
+    // To be reached .3 second after starting along the trajectory
+    goal.trajectory.points[ind].time_from_start = ros::Duration(.3);
+
+    // Second trajectory point
+    // Positions
+
+    ind += 1;
+    goal.trajectory.points[ind].positions.resize(7);
+    goal.trajectory.points[ind].positions[0] = data[0];
+    goal.trajectory.points[ind].positions[1] = data[1];
+    goal.trajectory.points[ind].positions[2] = data[2];
+    goal.trajectory.points[ind].positions[3] = data[3];
+    goal.trajectory.points[ind].positions[4] = data[4];
+    goal.trajectory.points[ind].positions[5] = data[5];
+    goal.trajectory.points[ind].positions[6] = data[6];
+    
+    // Velocities
+    goal.trajectory.points[ind].velocities.resize(7);
+
+    for (size_t j = 0; j < 7; ++j) {
+        goal.trajectory.points[ind].velocities[j] = 0.0;
+        ROS_INFO ("Dst point[%d] = %f", j, goal.trajectory.points[ind].positions[j]);    
+    }
+
+    // To be reached 2 seconds after starting along the trajectory
+    goal.trajectory.points[ind].time_from_start = ros::Duration(.8);
+
+    //we are done; return the goal
+    return goal;
+}
+
+
+void xx_callback (const std_msgs::String::ConstPtr& msg) {
+    double next_joints[14];   
+    ROS_INFO ("callback [%s]", msg->data.c_str ());
+
+    const char* s = msg->data.c_str ();
+    char data[256];
+    strcpy (data, s);    
+
+    char* x = strtok (data, " ");     
+    int i = 0;
+
+    while (x != NULL) {    
+        next_joints[i] = atof(x);
+        ROS_INFO ("tok %d: %f", i, next_joints[i]);
+        i++;
+        x = strtok (NULL, " ");   
+    }
+     
+    // move the ARM
+    ROS_INFO ("Starting to move arm");
+    startTrajectory(armExtensionTrajectory(next_joints));
+    // check if the move is completed.
+    
+    ROS_INFO ("Waiting for ARM move completion");
+	
+    while(!traj_client_->getState().isDone() && ros::ok()) {
+        usleep(50000);
+    }
+
+    ROS_INFO ("ARM move completed");
+	
+}
+
+
+
+ 
+int main (int argc, char** argv)
+{
+        // Init the ROS node
+        ROS_INFO ("INIT HELLO");
+        init (argc, argv);
+    	ros::spin ();	
+}

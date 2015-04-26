@@ -1,0 +1,8 @@
+prefix=/home/sww002/humanoid_project/devel
+
+Name: left_arm_controller
+Description: Description of left_arm_controller
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/sww002/humanoid_project/devel/lib 
+Requires: 
