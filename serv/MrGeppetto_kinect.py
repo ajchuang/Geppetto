@@ -1,86 +1,95 @@
 #!/usr/bin/python
-
-g_testing_mod = True
-
-import os
 import sys
+
+g_testing_mode = None
+
+if (len (sys.argv) == 2):
+    g_testing_mode = sys.argv[1]
+else:
+    g_testing_mode = False
+    
+print 'set testing mode: {}'.format (g_testing_mode)
+    
+import os
+
 import socket
 import thread
 import util
 from collections import deque
 
-if not g_testing_mod:
+if not g_testing_mode:
     # ros imports
     import rospy
     from std_msgs.msg import String
 
 # global variabls
+g_data  = ''
 g_tok_q = deque ()
-g_host = None
-g_kinect_port = None
+g_trans = list ()
+
+g_host          = None
+g_kinect_port   = None
+g_rec_host      = None
+g_rec_port      = None
 
 # global variables for ROS publisher
 g_pub_kinect    = None
+g_sample_rate   = None
+g_sample_cnt    = 0
 
 # using ros function
 def send_ros (pub, list):
 
-    global g_testing_mod
+    global g_testing_mode
 
     sent =        list[0]  + ' ' + list[1]  + ' ' + list[2]  + ' ' + list[3]  + ' '
     sent = sent + list[4]  + ' ' + list[5]  + ' ' + list[6]  + ' '
     sent = sent + list[7]  + ' ' + list[8]  + ' ' + list[9]  + ' ' + list[10] + ' ' 
     sent = sent + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
     
-    print 'sendin {}'.format (sent)
-
-    if not g_testing_mod:
+    if not g_testing_mode:
         try:
             pub.publish (sent);
         except rospy.ROSInterruptException:
             print 'ros interrupt exception'
             pass
 
+def send_rec (list):
+    sent ='KNT '+ list[0]  + ' ' + list[1]  + ' ' + list[2]  + ' ' + list[3]  + ' '
+    sent = sent + list[4]  + ' ' + list[5]  + ' ' + list[6]  + ' '
+    sent = sent + list[7]  + ' ' + list[8]  + ' ' + list[9]  + ' ' + list[10] + ' ' 
+    sent = sent + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
+    
+    # send to the recorder
+    sock = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto (sent, (g_rec_host, int(g_rec_port)))
 
 def parse_input (data, pub):
 
     global g_tok_q
-
+    global g_trans
+    global g_data
+    
     # add the new input to the token queue
-    g_tok_q.extend (data.strip().split (' '));
+    g_data += data
+    g_tok_q.extend (g_data.split (' '));
     
     while len(g_tok_q) > 0:
-
-        print 'test 0'
 
         # check 'Go' tag
         tag = g_tok_q.popleft ()
          
         if tag != 'GO':
-            print '{}'.format (tag)
-            continue
+            g_trans.append (tag)
+            
+            if len (g_trans) == 14:
+                send_ros (pub, g_trans)
+                send_rec (g_trans)
+                g_trans = []
+        else:
+            data = []
         
-        data = []
-        
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        data.append (g_tok_q.popleft ())
-        
-        # send via ROS functions
-        send_ros (pub, data)
-        return
+    return
 
 def handler (pub, conn, addr):
     
@@ -90,8 +99,7 @@ def handler (pub, conn, addr):
     while True:
         # get the new (raw) data
         new_data = conn.recv (1024)
-        parse_input (new_data, pub)
-            
+        parse_input (new_data.strip (), pub)
             
 def kinect_server_thread ():
     global g_kinect_port
@@ -122,17 +130,19 @@ def main ():
     
     global g_host
     global g_kinect_port
-    global g_testing_mod
+    global g_testing_mode
     global g_pub_kinect   
+    global g_sample_rate
 
-    g_host, g_kinect_port = util.read_conf ('kinect')
+    g_host, g_kinect_port, g_sample_rate = util.read_conf ('kinect')
+    g_rec_host, g_rec_port, unused = util.read_conf ('recorder')
     
-    if g_host == None:
+    if g_host == None or g_rec_host == None:
         print 'Kinect is not configured. Exit'
         return
 
     # init ros nodes
-    if not g_testing_mod:
+    if not g_testing_mode:
         print 'Initialize ROS nodes - kinect'
         g_pub_kinect = rospy.Publisher ('kinect', String, queue_size=10)
         rospy.init_node ('kinect', anonymous=True)
