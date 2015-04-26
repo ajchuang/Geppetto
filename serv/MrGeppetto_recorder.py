@@ -12,7 +12,6 @@ from collections import deque
 import util
 
 # global variabls
-g_conf  = None
 g_host  = None
 g_port  = None
 g_isRec = False
@@ -20,30 +19,48 @@ g_fname = None
 g_fh    = None
 g_beginTime = None
 
+def next_file_name():
+    num = 1
+    
+    while True:
+        file_name = './rec/recording_%d.txt' % num
+        if not os.path.exists (file_name):
+            return file_name
+        num += 1
+
 def data_handler (data):
     
+    global g_isRec
+    global g_fname
+    global g_fh
+    global g_beginTime
+    
     if g_isRec:
-        if data == 'STOP':
+        if data == 'END':
             g_fh.close ()
             print 'Recording completed - ' + g_fname
             
             g_fh = None
-            g_isRec = False
-            g_fname = next_file_name ()
+            g_fname = None
             g_beginTime = None
+            g_isRec = False
         else:
             if data == 'START':
                 return
             
-            curTime = int (datetime.datetime.now ())
+            curTime = util.unix_now ()
+            r = str(curTime - g_beginTime) + ' ' + data + '\n'
             
-            g_fh.write ((curTime - g_beginTime) + data + '\n')
+            print '[Rec] write :' + r
+            g_fh.write (r)
     else:
         if data == 'START':
+            g_fname = next_file_name ()
             print 'Start to record @ ' + g_fname
-            g_fname = next_filename ()
-            g_fh = open (g_fname, 'a')
-            g_beginTime = int (datetime.datetime.now ())
+            
+            g_fh = open (g_fname, 'w')
+            g_beginTime = util.unix_now ()
+            g_isRec = True
 
 def recorder_server_thread ():
 
@@ -69,8 +86,7 @@ def main ():
     global g_host
     global g_port
 
-    g_conf = util.read_all_conf ()
-    g_host, g_port = util.read_conf ('recorder')
+    g_host, g_port, unused = util.read_conf ('recorder')
 
     if g_host == None:
         print 'Recorder is not configured. Exis'

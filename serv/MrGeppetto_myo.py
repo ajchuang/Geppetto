@@ -21,7 +21,7 @@ g_myo_port  = None
 g_rec_host  = None
 g_rec_port  = None
 g_trans     = list ();
-g_trans_len = 3
+g_trans_len = 2
 g_is_rec    = False
 
 # global variables for ROS publisher
@@ -33,24 +33,32 @@ def send_str (s):
 
 def send_rec (lst):
     if g_is_rec:
-        sent = 'MYO ' + lst[0] + ' ' + lst[1] + ' ' + lst[2]
+        sent = 'MYO ' + lst[0] + ' ' + lst[1]
         send_str (sent)
 
 # using ros function
 def send_ros (pub, lst):
 
     if not g_testing_mode:
-        sent = lst[0] + ' ' + lst[1] + ' ' + lst[2]
+        sent = lst[0] + ' ' + lst[1]
         print 'sendin {}'.format (sent)
-        pub.publish (sent)
+        
+        try:
+            pub.publish (sent)
+            return True
+        except Exception, e:
+            print str(e)
+            return False
 
 def parse_input (data, pub):
 
     global g_tok_q
     global g_trans
+    global g_trans_len
+    global g_is_rec
 
     # add the new input to the token queue
-    g_tok_q.extend (data.strip().split (' '));
+    g_tok_q.extend (data.split (' '));
     
     while len(g_tok_q) > 0:
 
@@ -67,35 +75,26 @@ def parse_input (data, pub):
             continue
 
         if tag != 'GO':
-            print '{}'.format (tag)
             g_trans.append (tag)
-            continue
+            
+            # check if the condition is met.
+            if len(g_trans) == g_trans_len:
+                send_ros (pub, g_trans);
+                send_rec (g_trans)
+                g_trans = []
+                continue
         else:
-            g_trans.append (tag)
-       
-        # check if the condition is met.
-        if len(g_trans) == g_trans_len:
-            send_ros (pub, g_trans);
             g_trans = []
-
-        # send via ROS functions
-        send_rec (g_trans) 
-        return;
 
 def handler (pub, conn, addr):
     
-    try:
-        print 'handler started'
-        
-        # Keep the client here
-        while True:
-            # get the new (raw) data
-            new_data = conn.recv (1024)
-            parse_input (new_data.strip(), pub)
-            
-    except rospy.ROSInterruptException:
-        print 'ros interrupt exception'
-        pass
+    print 'handler started'
+    
+    # Keep the client here
+    while True:
+        # get the new (raw) data
+        new_data = conn.recv (1024)
+        parse_input (new_data.strip(), pub)
             
 def myo_server_thread ():
    
@@ -135,10 +134,10 @@ def main ():
     global g_rec_port
     global g_pub_myo
 
-    g_host, g_myo_port = util.read_conf ('myo') 
-    g_rec_host, g_rec_port = util.read_conf ('recorder')    
+    g_host, g_myo_port, unused = util.read_conf ('myo') 
+    g_rec_host, g_rec_port, unused = util.read_conf ('recorder')    
 
-    if g_host == None:
+    if g_host == None or g_rec_host == None:
         print 'MYO is not configured. Exit'
         return
 
