@@ -8,4 +8,4 @@ python MrGeppetto_kinect.py True &
 sleep 1
 
 echo 'Start Geppetto (myo)'
-python MrGeppetto_myo.py True &
+python MrGeppetto_myo.py False &
