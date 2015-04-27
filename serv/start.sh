@@ -4,7 +4,7 @@ python MrGeppetto_recorder.py &
 sleep 2
 
 echo 'Start Geppetto (kinect)'
-python MrGeppetto_kinect.py True &
+python MrGeppetto_kinect.py False &
 sleep 1
 
 echo 'Start Geppetto (myo)'

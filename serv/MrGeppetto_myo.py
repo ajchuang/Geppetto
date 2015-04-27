@@ -72,6 +72,7 @@ def parse_input (data, pub):
 
         # check 'Go' tag
         tag = g_tok_q.popleft ()
+	print 'tag: ' + tag + '==='
     
         if tag == 'START' or tag == 'END':
             if tag == 'START':

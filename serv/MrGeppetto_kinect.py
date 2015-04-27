@@ -38,7 +38,7 @@ g_roll_ang      = 0.0
 # global variables for ROS publisher
 g_pub_kinect    = None
 g_sample_rate   = None
-g_sample_cnt    = 0
+g_sample_cnt    = 23
 
 # using ros function
 def send_ros (pub, list):
@@ -73,6 +73,7 @@ def parse_input (data, pub):
     global g_trans
     global g_data
     global g_roll_ang
+    global g_sample_cnt
 
     # add the new input to the token queue
     g_data += data
@@ -88,26 +89,37 @@ def parse_input (data, pub):
             g_roll_ang = g_tok_q.popleft ();
 
         if tag != 'GO':
-            g_trans.append (tag)
+            
+            try:
+                tag = "{0:.2f}".format (float (tag))
+                g_trans.append (tag)
+            except:
+                pass
+	
             
             if len (g_trans) == 14:
-                send_ros (pub, g_trans)
-                send_rec (g_trans)
-                g_trans = []
+	
+		g_sample_cnt += 1
+
+		if g_sample_rate == g_sample_cnt:
+                    g_sample_cnt = 0
+                    send_ros (pub, g_trans)
+                    send_rec (g_trans)
+                    g_trans = []
         else:
-            data = []
+            g_trans = []
         
     return
 
 def handler (pub, conn, addr):
     
     print 'handler started'
-        
+
     # Keep the client here
     while True:
         # get the new (raw) data
         new_data = conn.recv (1024)
-        parse_input (new_data.strip (), pub)
+        parse_input (new_data, pub)
             
 def kinect_server_thread ():
     global g_kinect_port
@@ -143,6 +155,8 @@ def main ():
     global g_sample_rate
     global g_roll_host
     global g_roll_port
+    global g_rec_host
+    global g_rec_port
 
     g_host, g_kinect_port, g_sample_rate = util.read_conf ('kinect')
     g_rec_host, g_rec_port, unused = util.read_conf ('recorder')
@@ -150,6 +164,8 @@ def main ():
     if g_host == None or g_rec_host == None:
         print 'Kinect is not configured. Exit'
         return
+
+    print 'rec: {}:{}:{}'.format (g_rec_host, g_rec_port, g_sample_rate)
 
     # init ros nodes
     if g_testing_mode == 'False':
