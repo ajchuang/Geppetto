@@ -45,8 +45,13 @@ def send_ros (pub, list):
 
     global g_testing_mode
 
+    if list[4] != '0.0' :
+        r_ang = list[4]
+    else:
+        r_ang = str(g_roll_ang)
+
     sent =        list[0]  + ' ' + list[1]  + ' ' + list[2]  + ' ' + list[3]  + ' '
-    sent = sent + str(g_roll_ang) + ' ' + list[5]  + ' ' + list[6]  + ' '
+    sent = sent + r_ang    + ' ' + list[5]  + ' ' + list[6]  + ' '
     sent = sent + list[7]  + ' ' + list[8]  + ' ' + list[9]  + ' ' + list[10] + ' ' 
     sent = sent + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
     
@@ -58,8 +63,14 @@ def send_ros (pub, list):
             pass
 
 def send_rec (list):
+    
+    if list[4] != '0.0' :
+        r_ang = list[4]
+    else:
+        r_ang = str(g_roll_ang)
+    
     sent ='KNT '+ list[0]  + ' ' + list[1]  + ' ' + list[2]  + ' ' + list[3]  + ' '
-    sent = sent + str(g_roll_ang) + ' ' + list[5]  + ' ' + list[6]  + ' '
+    sent = sent + r_ang    + ' ' + list[5]  + ' ' + list[6]  + ' '
     sent = sent + list[7]  + ' ' + list[8]  + ' ' + list[9]  + ' ' + list[10] + ' ' 
     sent = sent + list[11] + ' ' + list[12] + ' ' + list[13] + ' '
     
