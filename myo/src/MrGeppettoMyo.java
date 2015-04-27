@@ -99,7 +99,7 @@ public class MrGeppettoMyo {
     public static void main (String[] args) {
 
         if (args.length != 4) {
-            err ("Incorrect input format");
+            err ("Incorrect input format: " + args.length);
             log ("[Usage] java MrGeppetto [host] [port] [kinect_host] [kinect_port]");
             return;
         }
