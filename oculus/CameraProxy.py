@@ -33,17 +33,15 @@ class SendThread(threading.Thread):
 def callback(data):
 	global cameraData
 	global clientSocket
-	global count
 	rospy.loginfo(rospy.get_caller_id() + "height %s", data.height)
 	rospy.loginfo(rospy.get_caller_id() + "width %s", data.width)
 	rospy.loginfo(rospy.get_caller_id() + "encoding %s", data.encoding)
+	sendData = "GO" + data.data
+	clientSocket.send(sendData)
+
 	# cameraData = data.data
-	if (count == 0):
-		#clientSocket.send(data.data)
-		fd = open("dump",'w')
-		fd.write(data.data)
-		sys.exit(0)
-		count += 1
+	#clientSocket.send(data.data)
+
 
 
 def cameraListener():
