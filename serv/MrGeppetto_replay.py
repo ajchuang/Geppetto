@@ -21,6 +21,9 @@ g_myo_port      = None
 
 g_diff = 50 #ms
 
+def err (s):
+    print '!!! [SYS] ' + s + ' !!!'
+
 def init_conn ():
     global g_sock_kinect
     global g_sock_myo
@@ -35,11 +38,22 @@ def send_kinect_cmd (toks):
     cmd += ' '     + toks[6]  + ' ' + toks[7]  + ' ' + toks[8]  + ' ' + toks[9]
     cmd += ' '     + toks[10] + ' ' + toks[11] + ' ' + toks[12] + ' ' + toks[13] 
     cmd += ' '     + toks[14] + ' ' + toks[15]
-    g_sock_kinect.send (cmd) 
+    print '  [REPLAY] Send to kinect: ' + cmd
+    try:
+        g_sock_kinect.send (cmd) 
+    except:
+        err ('Failed to send to kinect')
+        sys.exit (-1)
 
 def send_myo_cmd (toks):
     cmd =  'GO '   + toks[2] + ' ' + toks[3]
-    g_sock_myo.send ()
+    print '  [REPLAY] Send to MYO: ' + cmd
+    
+    try:
+        g_sock_myo.send (cmd)
+    except:
+        err ('Failed to send to MYO')
+        sys.exit (-1) 
 
 def exec_line (cmd, startTime):
     
@@ -47,23 +61,26 @@ def exec_line (cmd, startTime):
     dev = toks[1]
     etime = float (toks[0])
     ctime = float (util.unix_now ())
+   
 
     # recording format:
     #   time dev data...   
     # waiting for execution time
-    while ctime - startTime < 0:
+    while (ctime - startTime) - etime < 0.0:
         sleep (0.05)
         ctime = float (util.unix_now ())
         
-        print 'exec {' + str(line) + '} @ ' + str(ctime)
 
-        if dev == 'KNT':
-            send_kinect_cmd (toks)
-            break;
+    #print '{}:{}:{}'.format(ctime, etime, startTime)
+    print 'exec {' + str(cmd) + '} @ ' + str(ctime - startTime)
 
-        if dev == 'MYO':
-            send_myo_cmd (toks)
-            break;
+    toks = cmd.split ()
+
+    if dev == 'KNT':
+        send_kinect_cmd (toks)
+
+    if dev == 'MYO':
+        send_myo_cmd (toks)
 
 def replay ():
 
@@ -72,7 +89,7 @@ def replay ():
 
     with open (g_fname) as rec:
         for line in rec :
-            exec_line (line, st)
+            exec_line (line.strip (), st)
 
 def main ():
     global g_kinect_host

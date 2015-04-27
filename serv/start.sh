@@ -1,7 +1,12 @@
 #!/bin/bash
-RUN_REC='python MrGeppetto_recorder.py 1>./log/rec.log 2>./log/rec.err.log &'
-RUN_KIN='python MrGeppetto_kinect.py True 1>./log/kin.log 2>./log/kin.err.log &'
-RUN_MYO='python MrGeppetto_myo.py True 1>./log/myo.log 2>./log/myo.err.log &'
+TEST_MOD='False'
+if [ $1='True' ]; then
+    TEST_MOD='True'
+fi
+
+RUN_REC="python MrGeppetto_recorder.py 1>./log/rec.log 2>./log/rec.err.log &"
+RUN_KIN="python MrGeppetto_kinect.py $TEST_MOD 1>./log/kin.log 2>./log/kin.err.log &"
+RUN_MYO="python MrGeppetto_myo.py $TEST_MOD 1>./log/myo.log 2>./log/myo.err.log &"
 
 echo 'Start Geppetto (recorder)'
 eval $RUN_REC
