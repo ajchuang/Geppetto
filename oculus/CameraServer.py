@@ -46,16 +46,19 @@ class ClientThread(threading.Thread):
         print "[*] Connection from " + ip + ":" + str(port)
 
     def run(self):
-        tmp = ""
+        tmp = " " * 921600
         global cameraData
         global streamImg
         while True:
             #print "receiving"
             receive = self.socket.recv(2048)
             index = receive.find("GO")
-            if (index > -1):
+            if (index > -1) and ((len(tmp) + index) == 921600):
+                print "Good!"
                 tmp += receive[:index]
                 cameraData = tmp
+                #if (len(cameraData) == 921600):
+                #    print "Good!"
                 streamImg = transformation(np.fromstring(cameraData, np.uint8))
                 tmp = receive[index + 2:]
             else:
@@ -95,10 +98,11 @@ if __name__ == "__main__":
     #cv2.imshow("test",img)
     #cv2.waitKey(0)
     while True:
-        try:
-            cv2.imshow('PR2', streamImg)
-        except:
-            print "not yet"
+        if (streamImg != None):
+            try:
+                cv2.imshow('PR2', streamImg)
+            except:
+                print "not yet"
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
