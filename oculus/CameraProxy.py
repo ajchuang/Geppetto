@@ -39,8 +39,8 @@ def callback(data):
 	rospy.loginfo(rospy.get_caller_id() + "encoding %s", data.encoding)
 	# cameraData = data.data
 	if (count == 0):
-		clientSocket.send(data.data)
-		fd = open("dump", w)
+		#clientSocket.send(data.data)
+		fd = open("dump",'w')
 		fd.write(data.data)
 		sys.exit(0)
 		count += 1
