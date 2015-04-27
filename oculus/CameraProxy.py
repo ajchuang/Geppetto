@@ -33,9 +33,10 @@ class SendThread(threading.Thread):
 def callback(data):
 	global cameraData
 	global clientSocket
-	rospy.loginfo(rospy.get_caller_id() + "height %s", data.height)
-	rospy.loginfo(rospy.get_caller_id() + "width %s", data.width)
-	rospy.loginfo(rospy.get_caller_id() + "encoding %s", data.encoding)
+#	rospy.loginfo(rospy.get_caller_id() + "height %s", data.height)
+#	rospy.loginfo(rospy.get_caller_id() + "width %s", data.width)
+#	rospy.loginfo(rospy.get_caller_id() + "encoding %s", data.encoding)
+#	rospy.loginfo(rospy.get_caller_id() + "data len %s",len(data.data))
 	sendData = "GO" + data.data
 	clientSocket.send(sendData)
 
@@ -62,4 +63,4 @@ if __name__ == "__main__":
 	except:
 		print "[*] Server not found. Running local mode."
 
-		cameraListener()
+	cameraListener()
