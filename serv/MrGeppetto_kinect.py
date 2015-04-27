@@ -38,7 +38,7 @@ g_roll_ang      = 0.0
 # global variables for ROS publisher
 g_pub_kinect    = None
 g_sample_rate   = None
-g_sample_cnt    = 23
+g_sample_cnt    = 0
 
 # using ros function
 def send_ros (pub, list):
@@ -153,6 +153,7 @@ def main ():
     global g_testing_mode
     global g_pub_kinect   
     global g_sample_rate
+    global g_sample_cnt
     global g_roll_host
     global g_roll_port
     global g_rec_host
@@ -161,6 +162,9 @@ def main ():
     g_host, g_kinect_port, g_sample_rate = util.read_conf ('kinect')
     g_rec_host, g_rec_port, unused = util.read_conf ('recorder')
     
+    if g_sample_rate > 1:
+        g_sample_cnt = g_sample_rate - 1;
+
     if g_host == None or g_rec_host == None:
         print 'Kinect is not configured. Exit'
         return
