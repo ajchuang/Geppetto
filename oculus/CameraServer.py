@@ -83,6 +83,31 @@ def transformation(bgrList):
                 nparr[i][j][k] = bgrList[i*640*3 + j*3 + k]
     return nparr
 
+def faceDetect(image, faceCascade):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    faces = faceCascade.detectMultiScale(\
+        gray, \
+        scaleFactor = 1.1, \
+        minNeighbors = 5, \
+        minSize = (30, 30), \
+        flags =cv.CV_HAAR_SCALE_IMAGE)
+    # print "Found {0} faces!".format(len(faces))
+    for (x, y, w, h) in faces:
+        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    return image
+
+def display():
+    faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+    while True:
+        if (streamImg != None):
+            try:
+                displayImg = faceDetect(streamImg, faceCascade)
+                cv2.imshow('PR2', displayImg)
+            except:
+                print "No image yet"
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
 
 
 
@@ -94,17 +119,19 @@ if __name__ == "__main__":
     (clientSocket, (clientIP, clientPort)) = serverSocket.accept()
     clientThread = ClientThread(clientIP, clientPort, clientSocket)
     clientThread.start()
+    display()
     #img = cv2.imread('test.jpg')
     #cv2.imshow("test",img)
     #cv2.waitKey(0)
-    while True:
-        if (streamImg != None):
-            try:
-                cv2.imshow('PR2', streamImg)
-            except:
-                print "not yet"
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+
+    # while True:
+    #     if (streamImg != None):
+    #         try:
+    #             cv2.imshow('PR2', streamImg)
+    #         except:
+    #             print "not yet"
+    #     if cv2.waitKey(1) & 0xFF == ord('q'):
+    #         break
 
     # while True:
     #     (clientSocket, (clientIP, clientPort)) = serverSocket.accept()
