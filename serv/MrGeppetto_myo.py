@@ -34,6 +34,7 @@ g_is_rec    = False
 
 # global variables for ROS publisher
 g_pub_myo   = None
+g_sub_gpr   = None
 
 def send_str (s):
     sock = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
@@ -156,10 +157,10 @@ def main ():
 
     if g_testing_mode == 'False':
         print 'Initialize ROS nodes - myo'
-        g_pub_myo = rospy.Publisher ('myo', String, queue_size=10)
+        g_pub_myo = rospy.Publisher ('myo', String, queue_size=1)
         rospy.init_node ('myo', anonymous=True)
         rate = rospy.Rate (10) # 10hz
-    
+
     # starting the server
     print 'Starting Mr.Geppetto (myo) server @ {}:{}'.format(g_host, g_myo_port)
     myo_server_thread ()

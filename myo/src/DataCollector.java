@@ -22,6 +22,7 @@ public class DataCollector extends AbstractDeviceListener {
     private double yawW;
     private Pose currentPose;
     private Arm whichArm;
+    private Myo m_myo;
 
     public static void log (String s) { System.err.println ("  [DCR] " + s); }
 
@@ -32,18 +33,26 @@ public class DataCollector extends AbstractDeviceListener {
         m_isOn  = false;
         m_beginRecTime = 0;
 	    currentPose = new Pose ();
+        m_myo = null;
+    }
+
+    public void vib () {
+        if (m_myo != null)
+            m_myo.vibrate (VibrationType.VIBRATION_SHORT);
     }
 
     @Override
     public void onConnect (Myo myo, long timestamp, FirmwareVersion firmwareVersion) {
         log ("device connected");
         m_isOn = true;
+        m_myo = myo;
     }
 
     @Override
     public void onDisconnect (Myo myo, long timestamp) {
         log ("device disconnected");
         m_isOn = false;
+        m_myo = null;
     }
 
     @Override

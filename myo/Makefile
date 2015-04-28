@@ -3,6 +3,7 @@
 all:
 	@javac -cp ./src:./lib/myo-java-0.8.2-SNAPSHOT.jar ./src/DataCollector.java
 	@javac -cp ./src:./lib/myo-java-0.8.2-SNAPSHOT.jar ./src/MrGeppettoMyo.java
+	@javac -cp ./src:./lib/myo-java-0.8.2-SNAPSHOT.jar ./src/MrGeppettoMyo_Feedback.java
 	@mv ./src/*.class ./obj/ 
 
 clean:

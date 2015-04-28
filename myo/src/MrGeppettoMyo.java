@@ -129,6 +129,10 @@ public class MrGeppettoMyo {
 			DataCollector dc = new DataCollector ();
 			hub.addListener ((DeviceListener)dc);
 
+            /* starting vib server, and start */
+            MrGeppettoMyo_Feedback fb = new MrGeppettoMyo_Feedback (dc, 7777);
+            new Thread (fb).start ();
+
             /* establish the connection */
             MrGeppettoMyo mg = new MrGeppettoMyo (host, port, rhost, rport);
             
