@@ -1,8 +1,10 @@
 #!/bin/bash
 TEST_MOD='False'
-if [ $1='True' ]; then
+if [ "$1" == "True" ]; then
     TEST_MOD='True'
 fi
+
+echo "!!! Test mode = $TEST_MOD !!!"
 
 RUN_REC="python MrGeppetto_recorder.py 1>./log/rec.log 2>./log/rec.err.log &"
 RUN_KIN="python MrGeppetto_kinect.py $TEST_MOD 1>./log/kin.log 2>./log/kin.err.log &"
@@ -60,7 +62,7 @@ fi
 echo -n 'Stop Mr.Geppetto (y/n) :'
 read decision
 
-if [ $decision == 'y' ]; then
+if [ "$decision" == 'y' ]; then
     kill -9 $PID_REC
     kill -9 $PID_KIN
     kill -9 $PID_MYO

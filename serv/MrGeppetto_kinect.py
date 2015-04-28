@@ -106,19 +106,16 @@ def parse_input (data, pub):
                 g_trans.append (tag)
             except:
                 pass
-	
-            
-            if len (g_trans) == 14:
-	
-		g_sample_cnt += 1
 
-		if g_sample_rate == g_sample_cnt:
-                    g_sample_cnt = 0
+            if len (g_trans) == 14:	
+                g_sample_cnt += 1
+
+                if g_sample_rate < 1 or g_sample_rate == g_sample_cnt:
                     send_ros (pub, g_trans)
                     send_rec (g_trans)
                     g_trans = []
-        else:
-            g_trans = []
+            else:
+                g_trans = []
         
     return
 
