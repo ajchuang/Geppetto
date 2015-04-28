@@ -80,7 +80,7 @@ pr2_controllers_msgs::JointTrajectoryGoal armExtensionTrajectory (double* data){
     // Velocities
     goal.trajectory.points[ind].velocities.resize(7);
     
-    for (size_t j = 0; j < 7; ++j) {
+    for (int j = 0; j < 7; ++j) {
         goal.trajectory.points[ind].velocities[j] = 0.0;
     }
     
@@ -102,7 +102,7 @@ pr2_controllers_msgs::JointTrajectoryGoal armExtensionTrajectory (double* data){
     // Velocities
     goal.trajectory.points[ind].velocities.resize(7);
 
-    for (size_t j = 0; j < 7; ++j) {
+    for (int j = 0; j < 7; ++j) {
         goal.trajectory.points[ind].velocities[j] = 0.0;
         ROS_INFO ("Dst point[%d] = %f", j, goal.trajectory.points[ind].positions[j]);    
     }
@@ -140,9 +140,11 @@ void xx_callback (const std_msgs::String::ConstPtr& msg) {
     
     ROS_INFO ("Waiting for ARM move completion");
 	
+#if 0
     while(!traj_client_->getState().isDone() && ros::ok()) {
         usleep(50000);
     }
+#endif
 
     ROS_INFO ("ARM move completed");
 	
