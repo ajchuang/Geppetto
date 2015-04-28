@@ -8,17 +8,22 @@ from trajectory_msgs.msg import (JointTrajectory, JointTrajectoryPoint)
 from copy import copy
 
 global SERVER_SOCKET
-global POS = [0, 0]
+global POS
+global START_POS
+global FIRST
 
+
+POS = [0, 0]
+START_POS = [0, 0]
+FIRST = True
 SERVER_SOCKET = socket.socket()
 
 class ROSThread(threading.Thread):
-
+    def __init__(self, pub):
+	threading.Thread.__init__(self)
+	self.pub = pub
     def run(self):
         global POS
-        pub = rospy.Publisher ("/head_traj_controller/command", JointTrajectory, queue_size=10)
-        rospy.init_node ('HeadTajectoryPublisher', anonymous=True)
-        print "[*] ROS publisher initialized"
         while True:
             JTpoint = JointTrajectoryPoint()
             JTpoint.positions = POS
@@ -28,7 +33,7 @@ class ROSThread(threading.Thread):
             JTmsg.joint_names = ["head_pan_joint", "head_tilt_joint"]
             JTmsg.points = []
             JTmsg.points.append(copy(JTpoint))
-            pub.publish(JTmsg)
+            self.pub.publish(JTmsg)
 
 class OculusThread(threading.Thread):
 
@@ -50,10 +55,21 @@ class OculusThread(threading.Thread):
 
 
 def sendROS(pub, sendStr):
+    global FIRST
+    global START_POS
     global POS
     sendList = sendStr.strip().split()
     if sendList[0] == "s":
-        POS = sendList[1:3]
+        tmpPos = [sendList[3],sendList[2]]
+	tmpPos[0] = float("%.3f" % ((10) * float(tmpPos[0])))
+	tmpPos[1] = float("%.3f" % ((-10) * float(tmpPos[1])))
+	if FIRST:
+	    print "First!"
+	    START_POS = tmpPos
+	    START_POS[1] = 0
+	    FIRST = False
+	POS = [tmpPos[0] - START_POS[0], tmpPos[1] - START_POS[1]]
+	print POS
         # newStr = '  '.join(sendList)
         # pub.publish(newStr)
     return
@@ -76,9 +92,12 @@ def gracefulExit(signum, frame):
 def main():
     
     print "[*] " + "\n\nOculus bridge server started\n\n"
-    
-    pub = rospy.Publisher('Oculus', String, queue_size=10)
-    rospy.init_node('Oculus', anonymous = True)
+	    
+    pub = rospy.Publisher ("/head_traj_controller/command", JointTrajectory, queue_size=1)
+    rospy.init_node ('HeadTrajectoryPublisher', anonymous=True)
+    print "[*] ROS publisher initialized"
+    #pub = rospy.Publisher('Oculus', String, queue_size=10)
+    #rospy.init_node('Oculus', anonymous = True)
     signal.signal(signal.SIGINT, gracefulExit)
     port = int(sys.argv[2])
     SERVER_SOCKET.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  
@@ -88,6 +107,8 @@ def main():
     host = sys.argv[1]
     SERVER_SOCKET.bind((host, port))
     SERVER_SOCKET.listen(4)
+    rosThread = ROSThread(pub)
+    rosThread.start()
     while True:
         (oculusServerSocket, (ip, port)) = SERVER_SOCKET.accept()
         oculusThread = OculusThread(ip,port,oculusServerSocket,pub)
