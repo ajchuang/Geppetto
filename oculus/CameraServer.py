@@ -10,31 +10,17 @@ global streamImg
 global port
 global cameraData
 
-port = int(sys.argv[1])
+port = int(sys.argv[2])
 cameraData = None
 streamImg = None
 
 
-class ImageDisplayThread(threading.Thread):
+# class ImageDisplayThread(threading.Thread):
 
-    def run(self):
-        global cameraData
-        dump = ""
-        # while True:
-        #     if (cameraData != None) and (cameraData[0] != "i"):
-        #         print cameraData
-        #         count += 1
-        #         if (count == -1):
-        #             break
-        # gray = cv.CreateImage((100, 100), 8, 1)
-        # cv.ShowImage("sample", gray)
-        # cv.WaitKey(0)
-        # print "running image thread"
-        #img = cv2.imread('test.jpg')
-        # print "showing image"
-        #cv2.imshow("test",img)
-        # print "image showed"
-        #cv2.waitKey(0)
+#     def run(self):
+#         global cameraData
+#         dump = ""
+        
 
 class ClientThread(threading.Thread):
 
@@ -69,7 +55,10 @@ class ClientThread(threading.Thread):
 def socketInit(port):
     print "Camera server started, listening on port " + str(port)
     serverSocket = socket.socket()
-    ip = socket.gethostbyname(socket.gethostname())
+    #ip = socket.gethostbyname(socket.gethostname())
+    #ip = "209.2.216.211"
+    ip = sys.argv[1]
+    print ip
     serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)          
     serverSocket.bind((ip, port))
     return serverSocket    
@@ -112,8 +101,8 @@ def display():
 
 
 if __name__ == "__main__":
-    imageDisplayThread = ImageDisplayThread()
-    imageDisplayThread.start()
+    # imageDisplayThread = ImageDisplayThread()
+    # imageDisplayThread.start()
     serverSocket = socketInit(port)
     serverSocket.listen(4)
     (clientSocket, (clientIP, clientPort)) = serverSocket.accept()
