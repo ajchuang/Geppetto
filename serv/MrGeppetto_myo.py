@@ -73,7 +73,7 @@ def parse_input (data, pub):
 
         # check 'Go' tag
         tag = g_tok_q.popleft ()
-	print 'tag: ' + tag + '==='
+        # print 'tag: ' + tag + '==='
     
         if tag == 'START' or tag == 'END':
             if tag == 'START':
@@ -105,7 +105,7 @@ def handler (pub, conn, addr):
         try:
             # get the new (raw) data
             new_data = conn.recv (1024)
-            parse_input (new_data.strip(), pub)
+            parse_input (new_data, pub)
         except:
             print 'disconnected - abort'
             return
