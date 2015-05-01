@@ -8,7 +8,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     class PointQueue
     {
         Queue<DataPoint> m_pointQueue;
-        
+        int M_PTRS_IN_Q = 10;
+
         public PointQueue()
         {
             m_pointQueue = new Queue<DataPoint>();
@@ -16,7 +17,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         public void addPoint (DataPoint dp)
         {
-            if (m_pointQueue.Count < 10) {
+            if (m_pointQueue.Count < M_PTRS_IN_Q) {
                 m_pointQueue.Enqueue (dp);
             } else {
                 m_pointQueue.Dequeue();
@@ -24,6 +25,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
+        /* TODO: need to add the pointer filtering */
         public DataPoint Average ()
         {
             DataPoint dp = new DataPoint();
@@ -31,7 +33,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             while (m_pointQueue.Count > 0)
             {
-                dp.add(m_pointQueue.Dequeue ());
+                dp.add (m_pointQueue.Dequeue ());
             }
 
             dp.divide((double)cnt);

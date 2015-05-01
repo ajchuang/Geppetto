@@ -97,10 +97,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         NetworkStream m_networkStream;
         TcpClient m_tcpClient;
 
-        /* config */
-        string m_hostName = "128.59.19.233";
-        int m_port = 4009;
-        bool m_testing = false;
+        /* !!! configuration !!! */
+        string M_HOSTNAME   = "128.59.19.233";
+        int M_PORT          = 4009;
+        bool M_TESTING      = false;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -114,12 +114,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         
         void InitializeConnection () 
         {
-            if (m_testing)
+            if (M_TESTING)
                 return;
 
             try {
                 m_tcpClient = new TcpClient ();
-                m_tcpClient.Connect (m_hostName, m_port);
+                m_tcpClient.Connect (M_HOSTNAME, M_PORT);
                 m_networkStream = m_tcpClient.GetStream();
                 Trace.WriteLine ("connected");
             } catch {
@@ -344,7 +344,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             
             Trace.WriteLine(out_str);
             
-            if (m_testing)
+            if (M_TESTING)
                 return;
             
             Byte[] myBytes = Encoding.ASCII.GetBytes (out_str);
