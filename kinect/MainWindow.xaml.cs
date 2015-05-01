@@ -97,6 +97,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         NetworkStream m_networkStream;
         TcpClient m_tcpClient;
 
+        /* config */
+        string m_hostName = "128.59.19.233";
+        int m_port = 4009;
+        bool m_testing = false;
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -104,19 +109,19 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             m_queue = new PointQueue();
             InitializeComponent ();
-            //InitializeConnection ();
+            InitializeConnection ();
         }
         
         void InitializeConnection () 
         {
-            string hostName = "128.59.19.233";
-            int port = 4009;
-            //m_queue = new PointQueue();   
+            if (m_testing)
+                return;
+
             try {
                 m_tcpClient = new TcpClient ();
-                m_tcpClient.Connect (hostName, port);
+                m_tcpClient.Connect (m_hostName, m_port);
                 m_networkStream = m_tcpClient.GetStream();
-                Trace.WriteLine("connected");
+                Trace.WriteLine ("connected");
             } catch {
                 Trace.WriteLine ("Oooops");
             }
@@ -284,7 +289,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private void reportPos (Skeleton sk) {
 
             
-            //dumpPositions (sk);
+            //dumpPositons (sk);
 
             double r1 = calculateRightArmPam(sk);
             double r2 = calculateRightArmLift(sk);
@@ -301,6 +306,16 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             double l6 = 0.0;
             double l7 = 0.0;
             
+            if (r1 == double.NegativeInfinity || r2 == double.NegativeInfinity ||
+                r3 == double.NegativeInfinity || r4 == double.NegativeInfinity ||
+                l1 == double.NegativeInfinity || l2 == double.NegativeInfinity ||
+                l3 == double.NegativeInfinity || l4 == double.NegativeInfinity) {
+            
+                Trace.WriteLine ("[Warning] Untracked point");
+                return;
+            }
+
+
             
             m_queue.addPoint(new DataPoint(r1, r2, r3, r4, r5, r6, r7, l1, l2, l3, l4, l5, l6, l7));
 
@@ -319,15 +334,21 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             
             string out_str = 
                 "GO " +
-                String.Format ("{0:0.##}", dp.m_r1) + " " + String.Format ("{0:0.##}", dp.m_r2) + " " + String.Format ("{0:0.##}", dp.m_r3) + " " +
-                String.Format ("{0:0.##}", dp.m_r4) + " " + String.Format ("{0:0.##}", dp.m_r5) + " " + String.Format ("{0:0.##}", dp.m_r6) + " " +
-                String.Format ("{0:0.##}", dp.m_r7) + " " + String.Format ("{0:0.##}", dp.m_l1) + " " + String.Format ("{0:0.##}", dp.m_l2) + " " +
-                String.Format ("{0:0.##}", dp.m_l3) + " " + String.Format ("{0:0.##}", dp.m_l4) + " " + String.Format ("{0:0.##}", dp.m_l5) + " " + 
+                String.Format ("{0:0.##}", dp.m_r1) + " " + String.Format ("{0:0.##}", dp.m_r2) + " " + 
+                String.Format ("{0:0.##}", dp.m_r3) + " " + String.Format ("{0:0.##}", dp.m_r4) + " " + 
+                String.Format ("{0:0.##}", dp.m_r5) + " " + String.Format ("{0:0.##}", dp.m_r6) + " " +
+                String.Format ("{0:0.##}", dp.m_r7) + " " + String.Format ("{0:0.##}", dp.m_l1) + " " + 
+                String.Format ("{0:0.##}", dp.m_l2) + " " + String.Format ("{0:0.##}", dp.m_l3) + " " + 
+                String.Format ("{0:0.##}", dp.m_l4) + " " + String.Format ("{0:0.##}", dp.m_l5) + " " + 
                 String.Format ("{0:0.##}", dp.m_l6) + " " + String.Format ("{0:0.##}", dp.m_l7) + " ";
             
             Trace.WriteLine(out_str);
+            
+            if (m_testing)
+                return;
+            
             Byte[] myBytes = Encoding.ASCII.GetBytes (out_str);
-            /*
+            
             try
             {
                 m_networkStream.Write(myBytes, 0, myBytes.Length);
@@ -336,7 +357,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             catch
             {
                 return;
-            }*/
+            }
             
         }
         
@@ -448,6 +469,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         
         private vec getPointVect (Skeleton skeleton, JointType j, JointType r) 
         {
+            // check if the point is tracked
+            if (skeleton.Joints[j].TrackingState == JointTrackingState.Tracked && 
+                skeleton.Joints[r].TrackingState == JointTrackingState.Tracked) 
+            {
+                return null;
+            }
+
             SkeletonPoint sp    = skeleton.Joints[j].Position;
             SkeletonPoint sp_r  = skeleton.Joints[r].Position;
             return new vec (sp.X - sp_r.X, sp.Y - sp_r.Y, sp.Z - sp_r.Z);
@@ -464,8 +492,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             double lp;
             vec rvc = new vec(1.0, 0.0, 0.0);
-            //vec rvc = getPointVect (sk, JointType.ShoulderLeft, JointType.ShoulderCenter);
             vec arm = getPointVect (sk, JointType.ElbowLeft, JointType.ShoulderLeft);
+            
+            if (arm == null)
+                return double.NegativeInfinity;
             
             rvc.set_y (0.0);
             arm.set_y (0.0);
@@ -478,9 +508,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private double calculateLeftArmLift (Skeleton sk)
         {
             double lal;
-            //vec rvc = getPointVect (sk, JointType.ShoulderLeft, JointType.ShoulderCenter);
             vec x = new vec(0.0, 1.0, 0.0);
             vec arm = getPointVect(sk, JointType.ShoulderLeft, JointType.ElbowLeft);
+            
+            if (arm == null)
+                return double.NegativeInfinity;
             
             x.set_x (0.0);
             arm.set_x (0.0);
@@ -493,10 +525,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private double calculateLeftArmRoll(Skeleton sk)
         {
             double lar;
-            //vec rvc = getPointVect(sk, JointType.ShoulderRight, JointType.ShoulderCenter);
             vec re = new vec(1.0, 0.0, 0.0);
             vec arm = getPointVect(sk, JointType.WristLeft, JointType.ElbowLeft);
 
+            if (arm == null)
+                return double.NegativeInfinity;
+            
             re.set_z(0.0);
             arm.set_z(0.0);
 
@@ -513,6 +547,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             vec rvc = getPointVect(sk, JointType.WristLeft, JointType.ElbowLeft);
             vec arm = getPointVect(sk, JointType.ElbowLeft, JointType.ShoulderLeft);
 
+            if (arm == null || rvc == null)
+                return double.NegativeInfinity;
+            
             lfa = -rvc.angle(arm);
             //Debug.WriteLine("rangle: " + lfa);
             return lfa;
@@ -522,8 +559,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             double rp;
             vec rap = new vec(1.0, 0.0, 0.0);
-            //vec rvc = getPointVect(sk, JointType.ShoulderRight, JointType.ShoulderCenter);
             vec arm = getPointVect(sk, JointType.ElbowRight, JointType.ShoulderRight);
+            
+            if (arm == null)
+                return double.NegativeInfinity;
             
             rap.set_y (0.0);
             arm.set_y (0.0);
@@ -540,6 +579,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             vec re = new vec(0.0, 1.0, 0.0);
             vec arm = getPointVect(sk, JointType.ShoulderRight, JointType.ElbowRight);
 
+            if (arm == null)
+                return double.NegativeInfinity;
+            
             re.set_x (0.0);
             arm.set_x (0.0);
             
@@ -555,6 +597,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             vec re = new vec(1.0, 0.0, 0.0);
             vec arm = getPointVect(sk, JointType.WristRight, JointType.ElbowRight);
 
+            if (arm == null)
+                return double.NegativeInfinity;
+
             re.set_z(0.0);
             arm.set_z(0.0);
             rar = (Math.PI)/2-re.angle(arm);
@@ -569,6 +614,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             vec rvc = getPointVect(sk, JointType.WristRight, JointType.ElbowRight);
             vec arm = getPointVect(sk, JointType.ElbowRight, JointType.ShoulderRight);
 
+            if (arm == null || rvc == null)
+                return double.NegativeInfinity;
+            
             rfa = -rvc.angle(arm);
             //Debug.WriteLine("rangle: " + rfa);
             return rfa;
