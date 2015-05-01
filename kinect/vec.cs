@@ -20,9 +20,9 @@ class vec {
     public double y () {return m_y;}
     public double z () {return m_z;}
     
-    public void set_x (double x) {return m_x = x;}
-    public void set_y (double y) {return m_y = y;}
-    public void set_z (double z) {return m_z = z;}
+    public void set_x (double x) { m_x = x;}
+    public void set_y (double y) { m_y = y;}
+    public void set_z (double z) { m_z = z;}
     
     public double length () {return m_length; }
     
@@ -42,7 +42,7 @@ class vec {
         }
         
         double cos_ang = Math.Acos (dot (v) / (v.length() * m_length));
-        Debug.WriteLine ("angle: " + cos_ang);
+        //Debug.WriteLine ("angle: " + cos_ang);
         return cos_ang;
     }
 };

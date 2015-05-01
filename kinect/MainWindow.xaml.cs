@@ -10,8 +10,9 @@
 namespace Microsoft.Samples.Kinect.SkeletonBasics
 {
     using System;
+    using System.Text;
     using System.IO;
-    using System.Net;
+    using System.Net; 
     using System.Net.Sockets;
     using System.Windows;
     using System.Windows.Media;
@@ -23,6 +24,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     /// </summary>
     public partial class MainWindow : Window
     {
+        int m_sample = 0;
+
+        PointQueue m_queue;
+
         /// <summary>
         /// Width of output drawing
         /// </summary>
@@ -97,19 +102,21 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         public MainWindow()
         {
+            m_queue = new PointQueue();
             InitializeComponent ();
-            InitializeConnection ();
+            //InitializeConnection ();
         }
         
         void InitializeConnection () 
         {
-            string hostName = "129.236.228.116";
-            int port = 4002;
-            
+            string hostName = "128.59.19.233";
+            int port = 4009;
+            //m_queue = new PointQueue();   
             try {
                 m_tcpClient = new TcpClient ();
                 m_tcpClient.Connect (hostName, port);
                 m_networkStream = m_tcpClient.GetStream();
+                Trace.WriteLine("connected");
             } catch {
                 Trace.WriteLine ("Oooops");
             }
@@ -275,34 +282,64 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         // @lfred: TODO send information to the proxy
         private void reportPos (Skeleton sk) {
+
             
-            dumpPositions (sk);
-            
-            double r1 = calculateRightArmPam    (sk);
-            double r2 = calculateRightArmLift   (sk);
-            double r3 = 0.0;
-            double r4 = 0.0;
+            //dumpPositions (sk);
+
+            double r1 = calculateRightArmPam(sk);
+            double r2 = calculateRightArmLift(sk);
+            double r3 = calculateRightArmRoll(sk);
+            double r4 = calculateRightforeArmLift(sk);
             double r5 = 0.0;
             double r6 = 0.0;
             double r7 = 0.0;
-            double l1 = calculateLeftArmPam     (sk);
-            double l2 = calculateLeftArmLift    (sk);
-            double l3 = 0.0;
-            double l4 = 0.0;
+            double l1 = calculateLeftArmPam(sk);
+            double l2 = calculateLeftArmLift(sk);
+            double l3 = calculateLeftArmRoll(sk);
+            double l4 = calculateLeftforeArmLift(sk);
             double l5 = 0.0;
             double l6 = 0.0;
             double l7 = 0.0;
             
-            string out_str = 
-                "GO " + 
-                r1 + " " + r2 + " " + r3 + " " + r4 + " " + r5 + " " + r6 + " " + r7 +
-                l1 + " " + l2 + " " + l3 + " " + l4 + " " + l5 + " " + l6 + " " + l7; 
             
-            Byte[] myBytes = Encoding.ASCII.GetBytes (out_str);
-            m_networkStream.Write (myBytes, 0, myBytes.Length);
-            m_networkStream.Flush ();
-        }
+            m_queue.addPoint(new DataPoint(r1, r2, r3, r4, r5, r6, r7, l1, l2, l3, l4, l5, l6, l7));
 
+            /* @lfred: to reduce the number of points */
+            if (m_sample < 50)
+            {
+                m_sample++;
+                return;
+            }
+            else
+            {
+                m_sample = 0;
+            }
+
+            DataPoint dp = m_queue.Average();
+            
+            string out_str = 
+                "GO " +
+                String.Format ("{0:0.##}", dp.m_r1) + " " + String.Format ("{0:0.##}", dp.m_r2) + " " + String.Format ("{0:0.##}", dp.m_r3) + " " +
+                String.Format ("{0:0.##}", dp.m_r4) + " " + String.Format ("{0:0.##}", dp.m_r5) + " " + String.Format ("{0:0.##}", dp.m_r6) + " " +
+                String.Format ("{0:0.##}", dp.m_r7) + " " + String.Format ("{0:0.##}", dp.m_l1) + " " + String.Format ("{0:0.##}", dp.m_l2) + " " +
+                String.Format ("{0:0.##}", dp.m_l3) + " " + String.Format ("{0:0.##}", dp.m_l4) + " " + String.Format ("{0:0.##}", dp.m_l5) + " " + 
+                String.Format ("{0:0.##}", dp.m_l6) + " " + String.Format ("{0:0.##}", dp.m_l7) + " ";
+            
+            Trace.WriteLine(out_str);
+            Byte[] myBytes = Encoding.ASCII.GetBytes (out_str);
+            /*
+            try
+            {
+                m_networkStream.Write(myBytes, 0, myBytes.Length);
+                m_networkStream.Flush();
+            }
+            catch
+            {
+                return;
+            }*/
+            
+        }
+        
         /// <summary>
         /// Draws a skeleton's bones and joints
         /// </summary>
@@ -425,46 +462,116 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         
         private double calculateLeftArmPam (Skeleton sk)
         {
-            vec rvc = getPoint (sk, JointType.ShoulderLeft, JointType.ShoulderCenter);
-            vec arm = getPoint (sk, JointType.ElbowLeft, JointType.ShoulderLeft);
+            double lp;
+            vec rvc = new vec(1.0, 0.0, 0.0);
+            //vec rvc = getPointVect (sk, JointType.ShoulderLeft, JointType.ShoulderCenter);
+            vec arm = getPointVect (sk, JointType.ElbowLeft, JointType.ShoulderLeft);
             
             rvc.set_y (0.0);
             arm.set_y (0.0);
-            
-            return rvc.angle (arm);
+
+            lp = rvc.angle(arm) - (Math.PI)/2; 
+            // Debug.WriteLine("langle: " + lp);
+            return lp;
         }
         
         private double calculateLeftArmLift (Skeleton sk)
         {
-            vec rvc = getPoint (sk, JointType.ShoulderLeft, JointType.ShoulderCenter);
-            vec arm = getPoint (sk, JointType.ElbowLeft, JointType.ShoulderLeft);
+            double lal;
+            //vec rvc = getPointVect (sk, JointType.ShoulderLeft, JointType.ShoulderCenter);
+            vec x = new vec(0.0, 1.0, 0.0);
+            vec arm = getPointVect(sk, JointType.ShoulderLeft, JointType.ElbowLeft);
             
-            rvc.set_z (0.0);
-            arm.set_z (0.0);
-            
-            return rvc.angle (arm);
+            x.set_x (0.0);
+            arm.set_x (0.0);
+            lal = (Math.PI)/2 - x.angle(arm);
+
+            //Debug.WriteLine("langle: " + lal);
+            return lal;
         }
-        
+
+        private double calculateLeftArmRoll(Skeleton sk)
+        {
+            double lar;
+            //vec rvc = getPointVect(sk, JointType.ShoulderRight, JointType.ShoulderCenter);
+            vec re = new vec(1.0, 0.0, 0.0);
+            vec arm = getPointVect(sk, JointType.WristLeft, JointType.ElbowLeft);
+
+            re.set_z(0.0);
+            arm.set_z(0.0);
+
+            lar = (Math.PI)/2 - re.angle(arm); 
+
+
+            //Debug.WriteLine("rangle: " + lar);
+            return lar;
+        }
+
+        private double calculateLeftforeArmLift(Skeleton sk)
+        {
+            double lfa;
+            vec rvc = getPointVect(sk, JointType.WristLeft, JointType.ElbowLeft);
+            vec arm = getPointVect(sk, JointType.ElbowLeft, JointType.ShoulderLeft);
+
+            lfa = -rvc.angle(arm);
+            //Debug.WriteLine("rangle: " + lfa);
+            return lfa;
+        }
+
         private double calculateRightArmPam (Skeleton sk)
         {
-            vec rvc = getPoint (sk, JointType.ShoulderRight, JointType.ShoulderCenter);
-            vec arm = getPoint (sk, JointType.ElbowRight, JointType.ShoulderRight);
+            double rp;
+            vec rap = new vec(1.0, 0.0, 0.0);
+            //vec rvc = getPointVect(sk, JointType.ShoulderRight, JointType.ShoulderCenter);
+            vec arm = getPointVect(sk, JointType.ElbowRight, JointType.ShoulderRight);
             
-            rvc.set_y (0.0);
+            rap.set_y (0.0);
             arm.set_y (0.0);
             
-            return rvc.angle (arm);
+            rp = rap.angle (arm)-(Math.PI)/2;
+            //Debug.WriteLine("rangle: " + rp);
+            return rp;
         }
         
         private double calculateRightArmLift (Skeleton sk)
         {
-            vec rvc = getPoint (sk, JointType.ShoulderRight, JointType.ShoulderCenter);
-            vec arm = getPoint (sk, JointType.ElbowRight, JointType.ShoulderRight);
+            double ral;
+
+            vec re = new vec(0.0, 1.0, 0.0);
+            vec arm = getPointVect(sk, JointType.ShoulderRight, JointType.ElbowRight);
+
+            re.set_x (0.0);
+            arm.set_x (0.0);
             
-            rvc.set_z (0.0);
-            arm.set_z (0.0);
+            ral = (Math.PI)/2 - re.angle (arm);
+            //Debug.WriteLine("rangle: " + ral);
+            return ral;
+        }
+
+        private double calculateRightArmRoll(Skeleton sk)
+        {
+            double rar;
             
-            return rvc.angle (arm);
+            vec re = new vec(1.0, 0.0, 0.0);
+            vec arm = getPointVect(sk, JointType.WristRight, JointType.ElbowRight);
+
+            re.set_z(0.0);
+            arm.set_z(0.0);
+            rar = (Math.PI)/2-re.angle(arm);
+            
+            //Debug.WriteLine("rangle: " + rar);
+            return rar;
+        }
+
+        private double calculateRightforeArmLift(Skeleton sk)
+        {
+            double rfa;
+            vec rvc = getPointVect(sk, JointType.WristRight, JointType.ElbowRight);
+            vec arm = getPointVect(sk, JointType.ElbowRight, JointType.ShoulderRight);
+
+            rfa = -rvc.angle(arm);
+            //Debug.WriteLine("rangle: " + rfa);
+            return rfa;
         }
         
         private void dumpPositions (Skeleton skeleton)
