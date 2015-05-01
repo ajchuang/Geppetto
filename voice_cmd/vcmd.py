@@ -4,13 +4,12 @@ import speech_recognition as sr
 r = sr.Recognizer()
 
 while True:
-    with sr.Microphone () as source:                 # use the default microphone as the audio source
+    with sr.Microphone () as source:                # use the default microphone as the audio source
    
         try:
             print 'Please say the command: '
-            audio = r.listen (source)                   # listen for the first phrase and extract it into audio data
+            audio = r.listen (source)               # listen for the first phrase and extract it into audio data
             cmd = r.recognize (audio)
-
 
             if cmd == 'go':
                 print 'go forward'
