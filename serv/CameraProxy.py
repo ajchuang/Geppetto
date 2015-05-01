@@ -1,4 +1,6 @@
+#!/usr/bin/python
 import socket, sys, threading, time, os, signal
+import util
 
 # ros imports
 import rospy
@@ -13,8 +15,13 @@ global count
 
 count = 0
 cameraData = "init"
-ip = sys.argv[1]
-port = int(sys.argv[2])
+
+ip, port, unused = util.read_config ('cam_proxy')
+
+#ip = sys.argv[1]
+#port = int(sys.argv[2])
+
+
 clientSocket = socket.socket()
 
 class SendThread(threading.Thread):

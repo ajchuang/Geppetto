@@ -1,5 +1,6 @@
+#!/usr/bin/python
 import socket, sys, threading, time, os, signal
-
+import util
 
 #ros imports
 import rospy
@@ -99,12 +100,16 @@ def main():
     #pub = rospy.Publisher('Oculus', String, queue_size=10)
     #rospy.init_node('Oculus', anonymous = True)
     signal.signal(signal.SIGINT, gracefulExit)
-    port = int(sys.argv[2])
+    
+    # @lfred: read config from camera bridge
+    host, port, unused = util.read_config ('cam_brg')
+    
+    #port = int(sys.argv[2])
     SERVER_SOCKET.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  
     # host = "127.0.0.1"
     # host = socket.gethostbyname(socket.gethostname())
     # host = "192.168.1.139"
-    host = sys.argv[1]
+    #host = sys.argv[1]
     SERVER_SOCKET.bind((host, port))
     SERVER_SOCKET.listen(4)
     rosThread = ROSThread(pub)
