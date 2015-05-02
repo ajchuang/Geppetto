@@ -118,7 +118,7 @@ def main ():
     
     g_host, g_port, unused = util.read_conf ('vcmd') 
 
-    if g_host == None or g_rec_host == None:
+    if g_host == None:
         print 'VCMD is not configured. Exit'
         return
 

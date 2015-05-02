@@ -6,13 +6,19 @@ do
     then
         kill $2 1>/dev/null 2>/dev/null
         kill $3 1>/dev/null 2>/dev/null
+        kill $4 1>/dev/null 2>/dev/null
+        kill $5 1>/dev/null 2>/dev/null
+        kill $6 1>/dev/null 2>/dev/null
         exit
     fi
 
     if ! ps -p $2 > /dev/null 
     then
         kill $1 1>/dev/null 2>/dev/null
-        kill $2 1>/dev/null 2>/dev/null
+        kill $3 1>/dev/null 2>/dev/null
+        kill $4 1>/dev/null 2>/dev/null
+        kill $5 1>/dev/null 2>/dev/null
+        kill $6 1>/dev/null 2>/dev/null
         exit
     fi
 
@@ -20,6 +26,39 @@ do
     then
         kill $1 1>/dev/null 2>/dev/null
         kill $2 1>/dev/null 2>/dev/null
+        kill $4 1>/dev/null 2>/dev/null
+        kill $5 1>/dev/null 2>/dev/null
+        kill $6 1>/dev/null 2>/dev/null
+        exit
+    fi
+
+    if ! ps -p $4 > /dev/null
+    then
+        kill $1 1>/dev/null 2>/dev/null
+        kill $2 1>/dev/null 2>/dev/null
+        kill $3 1>/dev/null 2>/dev/null
+        kill $5 1>/dev/null 2>/dev/null
+        kill $6 1>/dev/null 2>/dev/null
+        exit
+    fi
+
+    if ! ps -p $5 > /dev/null
+    then
+        kill $1 1>/dev/null 2>/dev/null
+        kill $2 1>/dev/null 2>/dev/null
+        kill $3 1>/dev/null 2>/dev/null
+        kill $4 1>/dev/null 2>/dev/null
+        kill $6 1>/dev/null 2>/dev/null
+        exit
+    fi
+
+    if ! ps -p $6 > /dev/null
+    then
+        kill $1 1>/dev/null 2>/dev/null
+        kill $2 1>/dev/null 2>/dev/null
+        kill $3 1>/dev/null 2>/dev/null
+        kill $4 1>/dev/null 2>/dev/null
+        kill $5 1>/dev/null 2>/dev/null
         exit
     fi
 
