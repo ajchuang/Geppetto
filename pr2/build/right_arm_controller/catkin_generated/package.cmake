@@ -1,7 +1,0 @@
-set(_CATKIN_CURRENT_PACKAGE "right_arm_controller")
-set(right_arm_controller_MAINTAINER "sww002 <sww002@todo.todo>")
-set(right_arm_controller_DEPRECATED "")
-set(right_arm_controller_VERSION "0.0.0")
-set(right_arm_controller_BUILD_DEPENDS "actionlib" "geometry_msgs" "pr2_controllers_msgs" "roscpp" "sensor_msgs" "std_msgs")
-set(right_arm_controller_RUN_DEPENDS "actionlib" "geometry_msgs" "pr2_controllers_msgs" "roscpp" "sensor_msgs" "std_msgs")
-set(right_arm_controller_BUILDTOOL_DEPENDS "catkin" "genmsg")

@@ -1,7 +1,0 @@
-set(_CATKIN_CURRENT_PACKAGE "Gripper")
-set(Gripper_MAINTAINER "sww002 <sww002@todo.todo>")
-set(Gripper_DEPRECATED "")
-set(Gripper_VERSION "0.0.0")
-set(Gripper_BUILD_DEPENDS "actionlib" "pr2_controllers_msgs" "roscpp")
-set(Gripper_RUN_DEPENDS "actionlib" "pr2_controllers_msgs" "roscpp")
-set(Gripper_BUILDTOOL_DEPENDS "catkin")

@@ -1,2 +1,0 @@
-Gripper:left_arm_controller:right_arm_controller
--DCATKIN_DEVEL_PREFIX=/home/sww002/humanoid_project/devel -DCMAKE_INSTALL_PREFIX=/home/sww002/humanoid_project/install
