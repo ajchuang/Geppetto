@@ -166,6 +166,6 @@ int main (int argc, char** argv) {
     n = new ros::NodeHandle ();   
     gripper = new Gripper ();     
     traj_client_ = new TrajClient ("r_arm_controller/joint_trajectory_action", true);  
-    ros::Subscriber sub = n->subscribe ("chatter", 1000, action); 
+    ros::Subscriber sub = n->subscribe ("myo", 1000, action); 
     ros::spin();
 }

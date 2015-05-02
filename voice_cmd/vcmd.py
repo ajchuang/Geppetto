@@ -13,6 +13,9 @@ while True:
 
             if cmd == 'go':
                 print 'go forward'
+            
+            elif cmd == 'back':
+                print 'go back'
 
             elif cmd == 'stop':
                 print 'stop now'
