@@ -1,10 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(move_head)
+project(base)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED roscpp actionlib )
+find_package(catkin REQUIRED COMPONENTS
+  actionlib
+  pr2_controllers_msgs
+  roscpp
+  ##pr2_gripper_sensor_action
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -63,7 +68,7 @@ find_package(catkin REQUIRED roscpp actionlib )
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
+#   pr2_controllers_msgs
 # )
 
 ###################################
@@ -77,8 +82,8 @@ find_package(catkin REQUIRED roscpp actionlib )
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES move_head
-#  CATKIN_DEPENDS other_catkin_pkg
+#  LIBRARIES Gripper
+#  CATKIN_DEPENDS actionlib pr2_controllers_msgs roscpp
 #  DEPENDS system_lib
 )
 
@@ -89,21 +94,24 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a cpp library
-# add_library(move_head
-#   src/${PROJECT_NAME}/move_head.cpp
+# add_library(Gripper
+#   src/${PROJECT_NAME}/Gripper.cpp
 # )
 
 ## Declare a cpp executable
-add_executable(move_head src/move_head.cpp)
+add_executable(r_gripper src/r_gripper.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(move_head_node move_head_generate_messages_cpp)
+# add_dependencies(Gripper_node Gripper_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(move_head
+target_link_libraries(base
    ${catkin_LIBRARIES}
  )
 
@@ -122,7 +130,7 @@ add_executable(move_head src/move_head.cpp)
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS move_head move_head_node
+# install(TARGETS Gripper Gripper_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -147,7 +155,7 @@ add_executable(move_head src/move_head.cpp)
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_move_head.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_Gripper.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
