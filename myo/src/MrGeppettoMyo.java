@@ -173,8 +173,8 @@ public class MrGeppettoMyo {
                 String newPose = dc.getPose ();
                 int newRoll = dc.getRoll ();
 
-                String out = "GO " + newPose + " " + (newRoll / 180.0 * Math.PI);
-                String rol = "RL " + (newRoll / 180.0 * Math.PI);
+                String out = "GO " + newPose + " " + (newRoll / 180.0 * Math.PI) + " ";
+                String rol = "RL " + (newRoll / 180.0 * Math.PI) + " ";
 
                 /* skip if no change */
                 if (newPose.equals (curPose) && newRoll == curRoll)

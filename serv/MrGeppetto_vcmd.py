@@ -23,6 +23,7 @@ if g_testing_mode == 'False':
     from std_msgs.msg import String
 
 # global variabls
+g_data      = ''
 g_tok_q     = deque ()
 g_host      = None
 g_port      = None

@@ -37,7 +37,7 @@ def send_kinect_cmd (toks):
     cmd =  'GO '   + toks[2]  + ' ' + toks[3]  + ' ' + toks[4]  + ' ' + toks[5]  
     cmd += ' '     + toks[6]  + ' ' + toks[7]  + ' ' + toks[8]  + ' ' + toks[9]
     cmd += ' '     + toks[10] + ' ' + toks[11] + ' ' + toks[12] + ' ' + toks[13] 
-    cmd += ' '     + toks[14] + ' ' + toks[15]
+    cmd += ' '     + toks[14] + ' ' + toks[15] + ' '
     print '  [REPLAY] Send to kinect: ' + cmd
     try:
         g_sock_kinect.send (cmd) 
@@ -46,7 +46,7 @@ def send_kinect_cmd (toks):
         sys.exit (-1)
 
 def send_myo_cmd (toks):
-    cmd =  'GO '   + toks[2] + ' ' + toks[3]
+    cmd =  'GO '   + toks[2] + ' ' + toks[3] + ' ' 
     print '  [REPLAY] Send to MYO: ' + cmd
     
     try:
