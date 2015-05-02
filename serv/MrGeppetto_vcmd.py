@@ -30,8 +30,54 @@ g_port      = None
 # global variables for ROS publisher
 g_pub_vcmd  = None
 
+def parse_input (data, pub):
+
+    global g_tok_q
+
+    # add the new input to the token queue
+    g_tok_q.extend (data.split (' '));
+    
+    while len(g_tok_q) > 0:
+
+        # check 'Go' tag
+        tag = g_tok_q.popleft ()
+        # print 'tag: ' + tag + '==='
+    
+        if tag == 'START' or tag == 'END':
+            if tag == 'START':
+                g_is_rec = True
+            else:
+                g_is_rec = False
+
+            send_str (tag)
+            continue
+
+        if tag != 'GO':
+            g_trans.append (tag)
+            
+            # check if the condition is met.
+            if len(g_trans) == g_trans_len:
+                send_ros (pub, g_trans);
+                send_rec (g_trans)
+                g_trans = []
+                continue
+        else:
+            g_trans = []
 
 
+def handler (pub, conn, addr):
+    
+    print 'handler started'
+    
+    # Keep the client here
+    while True:
+        try:
+            # get the new (raw) data
+            new_data = conn.recv (1024)
+            parse_input (new_data, pub)
+        except:
+            print 'disconnected - abort'
+            return
 
 def vcmd_server_thread ():
    
