@@ -30,27 +30,31 @@ g_port      = None
 # global variables for ROS publisher
 g_pub_vcmd  = None
 
+# using ros function
+def send_ros (pub, lst):
+    if g_testing_mode == 'False':
+        sent = lst[0] + ' '
+        print 'sendin {}'.format (sent)
+        
+        try:
+            pub.publish (sent)
+            return True
+        except Exception, e:
+            print str(e)
+            return False
+
 def parse_input (data, pub):
 
     global g_tok_q
 
     # add the new input to the token queue
+    # buggy :p
     g_tok_q.extend (data.split (' '));
     
     while len(g_tok_q) > 0:
 
         # check 'Go' tag
         tag = g_tok_q.popleft ()
-        # print 'tag: ' + tag + '==='
-    
-        if tag == 'START' or tag == 'END':
-            if tag == 'START':
-                g_is_rec = True
-            else:
-                g_is_rec = False
-
-            send_str (tag)
-            continue
 
         if tag != 'GO':
             g_trans.append (tag)
@@ -58,12 +62,10 @@ def parse_input (data, pub):
             # check if the condition is met.
             if len(g_trans) == g_trans_len:
                 send_ros (pub, g_trans);
-                send_rec (g_trans)
                 g_trans = []
                 continue
         else:
             g_trans = []
-
 
 def handler (pub, conn, addr):
     
@@ -76,7 +78,7 @@ def handler (pub, conn, addr):
             new_data = conn.recv (1024)
             parse_input (new_data, pub)
         except:
-            print 'disconnected - abort'
+            print 'disconnected (vcmd) - abort'
             return
 
 def vcmd_server_thread ():
@@ -102,7 +104,7 @@ def vcmd_server_thread ():
             conn, addr = server.accept ()
             print 'Connected with ' + addr[0] + ':' + str(addr[1])
             
-            #thread.start_new_thread (handler, (g_pub_myo, conn, addr))
+            thread.start_new_thread (handler, (g_pub_vcmd, conn, addr))
         except:
             print 'Mr.Geppetto(myo) is not working'
             server.close ()
@@ -122,7 +124,7 @@ def main ():
 
     if g_testing_mode == 'False':
         print 'Initialize ROS nodes - vcmd'
-        g_pub_myo = rospy.Publisher ('vcmd', String, queue_size=1)
+        g_pub_vcmd = rospy.Publisher ('vcmd', String, queue_size=1)
         rospy.init_node ('vcmd', anonymous=True)
         rate = rospy.Rate (10) # 10hz
 
