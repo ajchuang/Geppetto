@@ -4,6 +4,7 @@ if [ "$1" == "True" ]; then
     TEST_MOD='True'
 fi
 
+echo '--------------------------------------------------'
 echo "!!! Test mode = $TEST_MOD !!!"
 
 RUN_REC="python MrGeppetto_recorder.py 1>./log/rec.log 2>./log/rec.err.log &"
@@ -46,10 +47,10 @@ echo -n 'Stop Mr.Geppetto (y/n) :'
 read decision
 
 if [ "$decision" == 'y' ]; then
-    kill -9 $PID_REC
-    kill -9 $PID_KIN
-    kill -9 $PID_MYO
-    kill -9 $PID_CPY
-    kill -9 $PID_BRG
-    kill -9 $PID_VCM
+    kill -9 $PID_REC 1>/dev/null 2>/dev/null
+    kill -9 $PID_KIN 1>/dev/null 2>/dev/null
+    kill -9 $PID_MYO 1>/dev/null 2>/dev/null
+    kill -9 $PID_CPY 1>/dev/null 2>/dev/null
+    kill -9 $PID_BRG 1>/dev/null 2>/dev/null
+    kill -9 $PID_VCM 1>/dev/null 2>/dev/null
 fi
