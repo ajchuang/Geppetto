@@ -4,3 +4,4 @@
     myo             localhost       4003        -1
     cam_proxy       localhost       4001        -1
     cam_brg         localhost       4011        -1
+    vcmd            localhost       4013        -1
