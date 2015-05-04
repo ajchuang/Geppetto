@@ -104,7 +104,7 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-add_executable(r_gripper src/r_gripper.cpp)
+add_executable(base src/base.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
