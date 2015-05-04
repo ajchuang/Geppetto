@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <sensor_msgs/JointState.h>
+#include <geometry_msgs/Twist.h>
 #include <string>
 
 /*****************************************************************************/
@@ -18,7 +19,7 @@
 /* Global Variables                                                          */
 /*****************************************************************************/
 ros::NodeHandle *gp_nh;
-ros::Publisher *gp_cmd_vel_pub;
+ros::Publisher g_cmd_vel_pub;
 
 /*****************************************************************************/
 /* functions                                                                 */
@@ -33,7 +34,7 @@ void vcmd_action (const std_msgs::String::ConstPtr& msg){
     if (strncmp (s, "go", 2) == 0) {
         base_cmd.linear.x = M_LINEAR_SPEED;
     } else if (strncmp (s, "back", 4) == 0) {
-        base_cmd.linear.x = (-1) * M_LIEAR_SPEED;
+        base_cmd.linear.x = (-1) * M_LINEAR_SPEED;
     } else if (strncmp (s, "stop", 4) == 0) {
         base_cmd.linear.x = 0.0;
     } else if (strncmp (s, "left", 4) == 0) {
@@ -46,7 +47,7 @@ void vcmd_action (const std_msgs::String::ConstPtr& msg){
     }
 
     /* send the command to the base */
-    gp_cmd_vel_pub->publish (base_cmd);
+    g_cmd_vel_pub.publish (base_cmd);
 }
 
 int main (int argc, char** argv) {
@@ -54,9 +55,9 @@ int main (int argc, char** argv) {
     gp_nh = new ros::NodeHandle ();  
 
     /* become a publisher */
-    gp_cmd_vel_pub = &(gp_nh->advertise<geometry_msgs::Twist>("/base_controller/command", 1));
+    g_cmd_vel_pub = gp_nh->advertise<geometry_msgs::Twist>("/base_controller/command", 1);
     
     /* register as a subscriber */
-    ros::Subscriber sub = n->subscribe ("vcmd", 10, vcmd_action); 
+    ros::Subscriber sub = gp_nh->subscribe ("vcmd", 10, vcmd_action); 
     ros::spin();
 }
