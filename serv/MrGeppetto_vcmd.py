@@ -25,6 +25,7 @@ if g_testing_mode == 'False':
 # global variabls
 g_data      = ''
 g_tok_q     = deque ()
+g_trans_len = 1
 g_host      = None
 g_port      = None
 
@@ -78,7 +79,8 @@ def handler (pub, conn, addr):
             # get the new (raw) data
             new_data = conn.recv (1024)
             parse_input (new_data, pub)
-        except:
+        except Exception, e:
+            print str (e)
             print 'disconnected (vcmd) - abort'
             return
 

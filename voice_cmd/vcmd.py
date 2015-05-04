@@ -66,14 +66,20 @@ def init_conn ():
     global g_port
     global g_socket
 
+    if len (sys.argv) != 3:
+        print '[vcmd] Ooops - bad input: [Host] [Port]'
+        sys.exit (0)
+
     try:
         g_host = sys.argv[1]
         g_port = int (sys.argv[2])
-        
+
+        print 'Connecting to {}:{}'.format (g_host, g_port)
         g_socket = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
-        g_socket.connect (g_host, g_port)
+        g_socket.connect ((g_host, g_port))
     except:
-        print '[vcmd] Ooops - bad input: [Host] [Port]'
+        print '[vcmd] Ooops - connection failure'
+        sys.exit (0)
 
     print '[vcmd] conn established'
     return
