@@ -47,7 +47,12 @@ void vcmd_action (const std_msgs::String::ConstPtr& msg){
     }
 
     /* send the command to the base */
-    g_cmd_vel_pub.publish (base_cmd);
+    ros::Rate rate (10.0);
+
+    for (int i=0; i<10; ++i) {          
+        g_cmd_vel_pub.publish (base_cmd);
+        rate.sleep ();
+    }
 }
 
 int main (int argc, char** argv) {

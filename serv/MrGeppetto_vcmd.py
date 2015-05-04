@@ -56,7 +56,9 @@ def parse_input (data, pub):
     while len(g_tok_q) > 0:
 
         # check 'Go' tag
-        tag = g_tok_q.popleft ()
+        tag = g_tok_q.popleft ().strip ()
+        if tag == '':
+            continue
 
         if tag != 'GO':
             g_trans.append (tag)
@@ -78,6 +80,7 @@ def handler (pub, conn, addr):
         try:
             # get the new (raw) data
             new_data = conn.recv (1024)
+            print 'Incoming data: ' + new_data
             parse_input (new_data, pub)
         except Exception, e:
             print str (e)
@@ -118,7 +121,8 @@ def main ():
 
     global g_host
     global g_port
-    
+    global g_pub_vcmd   
+ 
     g_host, g_port, unused = util.read_conf ('vcmd') 
 
     if g_host == None:
