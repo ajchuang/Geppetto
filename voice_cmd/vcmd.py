@@ -29,7 +29,9 @@ def v_rec ():
             try:
                 print 'Please say the command: '
                 audio = r.listen (source)               # listen for the first phrase and extract it into audio data
+                print 'Analyzing...'
                 cmd = r.recognize (audio)
+                print 'Analysis completed.'
 
                 if cmd == 'go':
                     print 'go forward'
