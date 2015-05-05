@@ -61,13 +61,13 @@ def sendROS(pub, sendStr):
     global POS
     sendList = sendStr.strip().split()
     if sendList[0] == "s":
-        tmpPos = [sendList[3],sendList[2]]
-	tmpPos[0] = float("%.3f" % ((10) * float(tmpPos[0])))
+        tmpPos = [sendList[1],sendList[2]]
+	tmpPos[0] = float("%.3f" % ((-10) * float(tmpPos[0])))
 	tmpPos[1] = float("%.3f" % ((-10) * float(tmpPos[1])))
 	if FIRST:
 	    print "First!"
 	    START_POS = tmpPos
-	    START_POS[1] = 0
+	    #START_POS[1] = 0
 	    FIRST = False
 	POS = [tmpPos[0] - START_POS[0], tmpPos[1] - START_POS[1]]
 	print POS
