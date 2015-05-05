@@ -10,7 +10,7 @@ global streamImg
 global port
 global cameraData
 
-port = int(sys.argv[2])
+
 cameraData = None
 streamImg = None
 
@@ -58,6 +58,7 @@ def socketInit(port):
     #ip = socket.gethostbyname(socket.gethostname())
     #ip = "209.2.216.211"
     ip = sys.argv[1]
+    port = int(sys.argv[2])
     print ip
     serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)          
     serverSocket.bind((ip, port))
@@ -83,31 +84,63 @@ def faceDetect(image, faceCascade):
     # print "Found {0} faces!".format(len(faces))
     for (x, y, w, h) in faces:
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    image = cv2.resize(image, (1440, 900), interpolation = cv2.INTER_CUBIC)
     return image
+
+def histEqual(image):
+    ycrcb = cv2.cvtColor(image, cv2.COLOR_BGR2YCR_CB)
+    #channels = [0, 0, 0]
+    channels = cv2.split(ycrcb)
+    print len(channels)
+    cv2.equalizeHist(channels[0], channels[0])
+    ycrcb = cv2.merge(channels)
+    result = cv2.cvtColor(ycrcb,cv2.COLOR_YCR_CB2BGR)
+    return result
 
 def display():
     faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
     while True:
+        if (sys.argv[1] == "local"):
+            test = cv2.imread("edwin.jpg")
+            rows,cols,rgb = test.shape
+            M = cv2.getRotationMatrix2D((cols/2,rows/2),-90,1)
+            test = cv2.warpAffine(test,M,(cols,rows))
+            displayImg = faceDetect(test, faceCascade)
+            displayImg = oculusResize(displayImg, displayImg, 900, 1440, 450)
+            cv2.imwrite('Camera.bmp', displayImg)
         if (streamImg != None):
             try:
-                displayImg = faceDetect(streamImg, faceCascade)
-                cv2.imshow('PR2', displayImg)
+                displayImg = histEqual(streamImg)
+                displayImg = faceDetect(displayImg, faceCascade)
+                displayImg = oculusResize(displayImg, displayImg, 900, 1440, 450)
+                cv2.imwrite('Camera.bmp', displayImg)
+                #cv2.imshow('PR2', displayImg)
             except:
                 print "No image yet"
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-
+def oculusResize(leftImage, rightImage, height, width, imgHeight):
+    blackHeight = (height - imgHeight) / 2
+    blackWidth = width
+    blackImage = np.zeros((blackHeight, blackWidth,3), np.uint8)
+    image = np.concatenate((leftImage, rightImage), axis=1)
+    image = cv2.resize(image, (width, imgHeight), interpolation = cv2.INTER_CUBIC)
+    image = np.concatenate((blackImage, image), axis=0)
+    image = np.concatenate((image, blackImage), axis=0)
+    return image
 
 
 if __name__ == "__main__":
     # imageDisplayThread = ImageDisplayThread()
     # imageDisplayThread.start()
-    serverSocket = socketInit(port)
-    serverSocket.listen(4)
-    (clientSocket, (clientIP, clientPort)) = serverSocket.accept()
-    clientThread = ClientThread(clientIP, clientPort, clientSocket)
-    clientThread.start()
+    if sys.argv[1] != "local":
+        port = 11111
+        serverSocket = socketInit(port)
+        serverSocket.listen(4)
+        (clientSocket, (clientIP, clientPort)) = serverSocket.accept()
+        clientThread = ClientThread(clientIP, clientPort, clientSocket)
+        clientThread.start()
     display()
     #img = cv2.imread('test.jpg')
     #cv2.imshow("test",img)
