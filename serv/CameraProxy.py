@@ -16,7 +16,7 @@ global count
 count = 0
 cameraData = "init"
 
-ip, port, unused = util.read_config ('cam_proxy')
+ip, port, unused = util.read_conf ('cam_proxy')
 
 #ip = sys.argv[1]
 #port = int(sys.argv[2])
@@ -44,7 +44,7 @@ def callback(data):
 #	rospy.loginfo(rospy.get_caller_id() + "width %s", data.width)
 #	rospy.loginfo(rospy.get_caller_id() + "encoding %s", data.encoding)
 #	rospy.loginfo(rospy.get_caller_id() + "data len %s",len(data.data))
-	sendData = "GO" + data.data
+	sendData = "G" + data.data
 	clientSocket.send(sendData)
 
 	# cameraData = data.data
