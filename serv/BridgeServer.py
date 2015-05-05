@@ -34,6 +34,8 @@ class ROSThread(threading.Thread):
             JTmsg.joint_names = ["head_pan_joint", "head_tilt_joint"]
             JTmsg.points = []
             JTmsg.points.append(copy(JTpoint))
+	    time.sleep(0.01)
+            print JTmsg
             self.pub.publish(JTmsg)
 
 class OculusThread(threading.Thread):
@@ -67,7 +69,7 @@ def sendROS(pub, sendStr):
 	if FIRST:
 	    print "First!"
 	    START_POS = tmpPos
-	    #START_POS[1] = 0
+	    START_POS[1] = 0
 	    FIRST = False
 	POS = [tmpPos[0] - START_POS[0], tmpPos[1] - START_POS[1]]
 	print POS
@@ -94,7 +96,7 @@ def main():
     
     print "[*] " + "\n\nOculus bridge server started\n\n"
 	    
-    pub = rospy.Publisher ("/head_traj_controller/command", JointTrajectory, queue_size=1)
+    pub = rospy.Publisher ("/head_traj_controller/command", JointTrajectory)
     rospy.init_node ('HeadTrajectoryPublisher', anonymous=True)
     print "[*] ROS publisher initialized"
     #pub = rospy.Publisher('Oculus', String, queue_size=10)
@@ -102,7 +104,7 @@ def main():
     signal.signal(signal.SIGINT, gracefulExit)
     
     # @lfred: read config from camera bridge
-    host, port, unused = util.read_config ('cam_brg')
+    host, port, unused = util.read_conf ('cam_brg')
     
     #port = int(sys.argv[2])
     SERVER_SOCKET.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  
