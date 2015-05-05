@@ -1,6 +1,6 @@
 #   server_name,    host_address,   host_port,  sample_rate
     recorder        localhost       4007        -1
-    kinect          localhost       4009        25
+    kinect          localhost       4009        -1
     myo             localhost       4003        -1
     cam_proxy       localhost       4001        -1
     cam_brg         localhost       4011        -1
