@@ -38,27 +38,32 @@ class ClientThread(threading.Thread):
         while True:
             #print "receiving"
             receive = self.socket.recv(2048)
-            index = receive.find("GO")
-            if (index > -1) and ((len(tmp) + index) == 921600):
+            index = receive.find("G")
+            tmp += receive
+            if len(tmp) >= 921601:
+                cameraData = tmp[1:921601]
+                tmp = tmp[921601:]
+            #if (index > -1) and ((len(tmp) + index) == 921600):
                 print "Good!"
-                tmp += receive[:index]
-                cameraData = tmp
+               # tmp += receive[:index]
+               # cameraData = tmp
                 #if (len(cameraData) == 921600):
                 #    print "Good!"
                 streamImg = transformation(np.fromstring(cameraData, np.uint8))
-                tmp = receive[index + 2:]
-            else:
-                tmp += receive
+               # tmp = receive[index + 1:]
+            #else:
+            #    tmp += receive
 
         
 
-def socketInit(port):
+def socketInit():
+    ip = sys.argv[1]
+    port = int(sys.argv[2])
     print "Camera server started, listening on port " + str(port)
     serverSocket = socket.socket()
     #ip = socket.gethostbyname(socket.gethostname())
     #ip = "209.2.216.211"
-    ip = sys.argv[1]
-    port = int(sys.argv[2])
+    
     print ip
     serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)          
     serverSocket.bind((ip, port))
@@ -91,7 +96,7 @@ def histEqual(image):
     ycrcb = cv2.cvtColor(image, cv2.COLOR_BGR2YCR_CB)
     #channels = [0, 0, 0]
     channels = cv2.split(ycrcb)
-    print len(channels)
+    #print len(channels)
     cv2.equalizeHist(channels[0], channels[0])
     ycrcb = cv2.merge(channels)
     result = cv2.cvtColor(ycrcb,cv2.COLOR_YCR_CB2BGR)
@@ -114,6 +119,7 @@ def display():
                 displayImg = faceDetect(displayImg, faceCascade)
                 displayImg = oculusResize(displayImg, displayImg, 900, 1440, 450)
                 cv2.imwrite('Camera.bmp', displayImg)
+                time.sleep(0.03)
                 #cv2.imshow('PR2', displayImg)
             except:
                 print "No image yet"
@@ -135,8 +141,8 @@ if __name__ == "__main__":
     # imageDisplayThread = ImageDisplayThread()
     # imageDisplayThread.start()
     if sys.argv[1] != "local":
-        port = 11111
-        serverSocket = socketInit(port)
+        #port = 11111
+        serverSocket = socketInit()
         serverSocket.listen(4)
         (clientSocket, (clientIP, clientPort)) = serverSocket.accept()
         clientThread = ClientThread(clientIP, clientPort, clientSocket)
