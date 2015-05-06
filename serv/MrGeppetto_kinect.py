@@ -57,6 +57,7 @@ def send_ros (pub, list):
     
     if g_testing_mode == 'False':
         try:
+            #print 'send ROS: ' + sent
             pub.publish (sent);
         except rospy.ROSInterruptException:
             print 'ros interrupt exception'
@@ -110,12 +111,13 @@ def parse_input (data, pub):
             if len (g_trans) == 14:	
                 g_sample_cnt += 1
 
-                if g_sample_rate < 1 or g_sample_rate == g_sample_cnt:
-                    send_ros (pub, g_trans)
-                    send_rec (g_trans)
-                    g_trans = []
-            else:
+                #if g_sample_rate < 1 or g_sample_rate == g_sample_cnt:
+                #print 'sending ROS'
+                send_ros (pub, g_trans)
+                send_rec (g_trans)
                 g_trans = []
+        else:
+            g_trans = []
         
     return
 
