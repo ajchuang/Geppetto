@@ -98,7 +98,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         TcpClient m_tcpClient;
 
         /* !!! configuration !!! */
-        string M_HOSTNAME   = "128.59.19.233";
+        string M_HOSTNAME   = "128.59.17.203";
         int M_PORT          = 4009;
         bool M_TESTING      = false;
 
@@ -291,10 +291,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             
             //dumpPositons (sk);
 
-            double r1 = calculateRightArmPam(sk);
-            double r2 = calculateRightArmLift(sk);
-            double r3 = calculateRightArmRoll(sk);
-            double r4 = calculateRightforeArmLift(sk);
+            double r1 = 0.0; // calculateRightArmPam(sk);
+            double r2 = 0.0; //calculateRightArmLift(sk);
+            double r3 = 0.0; //calculateRightArmRoll(sk);
+            double r4 = 0.0; //calculateRightforeArmLift(sk);
             double r5 = 0.0;
             double r6 = 0.0;
             double r7 = 0.0;
@@ -306,6 +306,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             double l6 = 0.0;
             double l7 = 0.0;
             
+            /*
             if (r1 == double.NegativeInfinity || r2 == double.NegativeInfinity ||
                 r3 == double.NegativeInfinity || r4 == double.NegativeInfinity ||
                 l1 == double.NegativeInfinity || l2 == double.NegativeInfinity ||
@@ -314,13 +315,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 Trace.WriteLine ("[Warning] Untracked point");
                 return;
             }
+             */
 
-
-            
             m_queue.addPoint(new DataPoint(r1, r2, r3, r4, r5, r6, r7, l1, l2, l3, l4, l5, l6, l7));
 
             /* @lfred: to reduce the number of points */
-            if (m_sample < 50)
+            if (m_sample < 20)
             {
                 m_sample++;
                 return;
@@ -342,7 +342,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 String.Format ("{0:0.##}", dp.m_l4) + " " + String.Format ("{0:0.##}", dp.m_l5) + " " + 
                 String.Format ("{0:0.##}", dp.m_l6) + " " + String.Format ("{0:0.##}", dp.m_l7) + " ";
             
-            Trace.WriteLine(out_str);
+            
             
             if (M_TESTING)
                 return;
@@ -351,6 +351,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             
             try
             {
+                Trace.WriteLine(out_str);
                 m_networkStream.Write(myBytes, 0, myBytes.Length);
                 m_networkStream.Flush();
             }
@@ -469,13 +470,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         
         private vec getPointVect (Skeleton skeleton, JointType j, JointType r) 
         {
+            /*
             // check if the point is tracked
             if (skeleton.Joints[j].TrackingState == JointTrackingState.Tracked && 
                 skeleton.Joints[r].TrackingState == JointTrackingState.Tracked) 
             {
                 return null;
             }
-
+            */
             SkeletonPoint sp    = skeleton.Joints[j].Position;
             SkeletonPoint sp_r  = skeleton.Joints[r].Position;
             return new vec (sp.X - sp_r.X, sp.Y - sp_r.Y, sp.Z - sp_r.Z);
